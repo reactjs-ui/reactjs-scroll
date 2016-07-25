@@ -1,0 +1,405 @@
+import Tween from 'component-tween'
+import raf from 'component-raf'
+import throttle from 'throttleit'
+import debounce from 'debounce'
+import assign from 'lodash/assign';
+
+import perfect from './perfect';
+import ScrollBar from './ScrollBar'
+
+// 函数
+const max = Math.max;
+const min = Math.min;
+const now = Date.now ||
+  function () {
+    return (new Date()).getTime()
+  };
+
+/**
+ * Init Scroll with el and optional options
+ * options.scrollBar show scrollBar if is true
+ *
+ * @param {Object} options
+ */
+class Scroll {
+  //默认属性
+  static defaultOptions = {
+    scrollbar: true
+  };
+
+  constructor(options) {
+    options = assign({}, Scroll.defaultOptions, options);
+    this.options = options;
+
+    // 初始化y 坐标
+    this.y = 0;
+    // scroller 区域高度值，开始取 80，防止设置太小，滚动不明显
+    this.max = options.max || 80;
+    const wrapper = options.wrapper;
+    const scroller = wrapper.children[0];
+    // 包裹区域元素
+    this.wrapper = wrapper;
+    // 内层元素
+    this.scroller = scroller;
+    this.scrollerMargin = parseInt(perfect.getStyles(this.scroller, 'marginBottom'), 10)
+      + parseInt(perfect.getStyles(this.scroller, 'marginTop'), 10);
+
+    this.handleEvent = this.handleEvent.bind(this);
+    this._initEvent();
+
+    this.refresh(true);
+
+    if (options.scrollBar !== false) {
+      this.scrollBar = new ScrollBar(wrapper, options.barClass);
+    }
+    //防抖处理
+    this.onScrollEnd = debounce(this.onScrollEnd, 30);
+    //防止执行的太频繁
+    this.transformScrollBar = throttle(this.transformScrollBar, 100);
+  }
+
+  // 事件句柄
+  handleEvent(e) {
+    /*eslint-disable indent*/
+    switch (e.type) {
+      case 'touchstart':
+        this.ontouchstart(e);
+        break;
+      case 'touchmove':
+        this.ontouchmove(e);
+        break;
+      case 'touchcancel':
+      case 'touchend':
+      case 'touchleave':
+        this.ontouchend(e);
+        break;
+      default:
+        break;
+    }
+  }
+
+  /**
+   * Unbind all event listeners, and remove scrollBar if necessary
+   */
+  unmount() {
+    this._initEvent(true);
+    if (this.scrollBar) {
+      this.scrollBar.unmount();
+    }
+  }
+
+  /**
+   * 初始化或卸载事件
+   * @param detach 设为 true 表示卸载
+   */
+  _initEvent(detach) {
+    const action = detach ? 'removeEventListener' : 'addEventListener';
+
+    this.wrapper[action]('touchstart', this.handleEvent, false);
+    this.wrapper[action]('touchmove', this.handleEvent, false);
+    this.wrapper[action]('touchend', this.handleEvent, false);
+    this.wrapper[action]('touchleave', this.handleEvent, false);
+    this.wrapper[action]('touchcancel', this.handleEvent, false);
+  }
+
+  /**
+   * Recalculate the height
+   * @param noScroll 如果还没有滚动时，直接返回，即初始化的时候
+   */
+  refresh(noScroll) {
+    const sh = this.viewHeight = this.wrapper.getBoundingClientRect().height;
+    const ch = this.height = this.scroller.getBoundingClientRect().height + this.scrollerMargin;
+    //计算最小高度，可能会否
+    this.minY = min(0, sh - ch);
+    if (noScroll === true) {
+      return;
+    }
+    if (this.y < this.minY) {
+      this.scrollTo(this.minY, 300)
+    } else if (this.y > 0) {
+      this.scrollTo(0, 300)
+    }
+  }
+
+  /**
+   * touchstart event handler
+   *
+   * @param  {Event}  e
+   */
+  ontouchstart(e) {
+    e.preventDefault();
+    this.speed = null;
+    if (this.tween) {
+      this.tween.stop();
+    }
+    this.refresh(true);
+    let start = this.y;
+    if (e.target === this.wrapper) {
+      start = min(start, 0);
+      start = max(start, this.minY);
+      // fix the invalid start position
+      if (start !== this.y) {
+        return this.scrollTo(start, 200)
+      }
+      return
+    }
+
+    const touch = this.getTouch(e);
+    const sx = touch.clientX;
+    const sy = touch.clientY;
+    const at = now();
+
+
+    this.onstart = function (x, y) {
+      // no moved up and down, so don't know
+      if (sy === y) {
+        return;
+      }
+      //更新完重置为 null
+      this.onstart = null;
+      const dx = Math.abs(x - sx)
+      const dy = Math.abs(y - sy)
+      // move left and right
+      if (dx > dy) return
+      this.clientY = touch.clientY
+      this.dy = 0
+      this.ts = now()
+      this.down = {
+        x: sx,
+        y: sy,
+        start,
+        at
+      }
+      if (this.scrollBar) {
+        this.resizeScrollBar()
+      }
+      return true
+    }
+  }
+
+  /**
+   * touchmove event handler
+   *
+   * @param  {Event}  e
+   */
+  ontouchmove(e) {
+    e.preventDefault()
+    if (!this.down && !this.onstart) {
+      return
+    }
+    const touch = this.getTouch(e)
+    const x = touch.clientX
+    const y = touch.clientY
+    if (this.onstart) {
+      const started = this.onstart(x, y)
+      if (started !== true) {
+        return
+      }
+    }
+    const down = this.down
+    const dy = this.dy = y - down.y
+
+    //calculate speed every 100 milisecond
+    this.calcuteSpeed(touch.clientY, down.at)
+    const start = this.down.start
+    let dest = start + dy
+    dest = min(dest, this.max)
+    dest = max(dest, this.minY - this.max)
+    this.translate(dest)
+  }
+
+  /**
+   * Calcute speed by clientY
+   *
+   * @param {Number} y
+   */
+  calcuteSpeed(y, start) {
+    const ts = now()
+    const dt = ts - this.ts
+    if (ts - start < 100) {
+      this.distance = y - this.clientY
+      this.speed = Math.abs(this.distance / dt)
+    } else if (dt > 100) {
+      this.distance = y - this.clientY
+      this.speed = Math.abs(this.distance / dt)
+      this.ts = ts
+      this.clientY = y
+    }
+  }
+
+  /**
+   * Event handler for touchend
+   *
+   * @param  {Event}  e
+   */
+  ontouchend(e) {
+    if (!this.down) return
+    const at = this.down.at
+    this.down = null
+    const touch = this.getTouch(e)
+    this.calcuteSpeed(touch.clientY, at)
+    const m = this.momentum()
+    this.scrollTo(m.dest, m.duration, m.ease)
+  }
+
+  /**
+   * Calculate the animate props for moveon
+   *
+   * @return {Object}
+   */
+  momentum() {
+    const deceleration = 0.001
+    let speed = this.speed
+    speed = min(speed, 2)
+    const y = this.y
+    const rate = (4 - Math.PI) / 2
+    let destination = y + rate * (speed * speed) / (2 * deceleration) * (this.distance < 0 ? -1 : 1)
+    let duration = speed / deceleration
+    let ease
+    const minY = this.minY
+    if (y > 0 || y < minY) {
+      duration = 500
+      ease = 'out-circ'
+      destination = y > 0 ? 0 : minY
+    } else if (destination > 0) {
+      destination = 0
+      ease = 'out-back'
+    } else if (destination < minY) {
+      destination = minY
+      ease = 'out-back'
+    }
+    return {
+      dest: destination,
+      duration,
+      ease
+    }
+  }
+
+  /**
+   * Scroll to potions y with optional duration and ease function
+   *
+   * @param {Number} y
+   * @param {Number} duration
+   * @param {String} easing
+   */
+  scrollTo(y, duration, easing) {
+    if (this.tween) this.tween.stop()
+    const transition = (duration > 0 && y !== this.y)
+    if (!transition) {
+      this.direction = 0
+      this.translate(y)
+      return this.onScrollEnd()
+    }
+
+    this.direction = y > this.y ? -1 : 1
+
+    easing = easing || 'out-circ'
+    const tween = this.tween = Tween({
+      y: this.y
+    })
+      .ease(easing)
+      .to({
+        y
+      })
+      .duration(duration)
+
+    tween.update(o => {
+      this.translate(o.y)
+    });
+
+    let animate = function () {
+      raf(animate)
+      tween.update()
+    }
+
+    const promise = new Promise(resolve => {
+      tween.on('end', () => {
+        resolve()
+        this.animating = false
+        animate = () => {
+        }
+        if (!tween.stopped) { // no emit scrollend if tween stopped
+          this.onScrollEnd()
+        }
+      })
+    })
+
+    animate()
+    this.animating = true
+    return promise
+  }
+
+  /**
+   * Gets the appropriate "touch" object for the `e` event. The event may be from
+   * a "mouse", "touch", or "Pointer" event, so the normalization happens here.
+   *
+   */
+
+  getTouch(e) {
+    let touch = e
+    if (e.changedTouches && e.changedTouches.length > 0) {
+      touch = e.changedTouches[0]
+    }
+    return touch
+  }
+
+  /**
+   * Translate to `x`.
+   *
+   */
+
+  translate(y) {
+    const style = this.scroller.style
+    if (isNaN(y)) return
+    y = Math.floor(y)
+    //reach the end
+    if (this.y !== y) {
+      this.y = y
+      if (this.scrollBar) {
+        this.transformScrollBar()
+      }
+    }
+    style.webkitTransform = `translate3d(0, ${y}px, 0)`;
+    style.transform = `translate3d(0, ${y}px, 0)`;
+  }
+
+
+  /**
+   * show the scrollBar and size it
+   */
+  resizeScrollBar() {
+    const vh = this.viewHeight
+    const h = vh * vh / this.height
+    this.scrollBar.resize(h)
+  }
+
+  /**
+   * Hide scrollBar
+   */
+  hideScrollBar() {
+    if (this.scrollBar) this.scrollBar.hide()
+  }
+
+  /**
+   * Scrollend
+   *
+   */
+  onScrollEnd() {
+    if (this.animating) return
+    this.hideScrollBar()
+    const y = this.y
+  }
+
+  /**
+   * Transform scrollBar
+   */
+  transformScrollBar() {
+    const vh = this.viewHeight
+    const h = this.height
+    const y = Math.round(-(vh - vh * vh / h) * this.y / (h - vh))
+    this.scrollBar.translateY(y)
+  }
+}
+
+
+export default Scroll

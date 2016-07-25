@@ -1,0 +1,32 @@
+.rc-scroll-wrapper {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 100%;
+  overflow: hidden;
+  user-select: none;
+  outline: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.rc-scroll {
+  position: absolute;
+  z-index: 1;
+  width: 100%;
+  transform: translateZ(0);
+  touch-action: none;
+}
+
+.rc-scrollbar {
+  position: absolute;
+  right: 1px;
+  top: 0;
+  transition: background-color 0.2s ease-out, transform 0.1s ease-out, width 0.1s ease-out, height 0.1s ease-out;
+  width: 2px;
+  border-radius: 1px;
+  background-color: rgba(0, 0, 0, 0);
+  z-index: 9999;
+  height: 0;
+}
