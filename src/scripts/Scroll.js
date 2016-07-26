@@ -24,18 +24,27 @@ const now = Date.now ||
 class Scroll {
   //默认属性
   static defaultOptions = {
-    scrollbar: true
+    scrollbar: true,
+    maxAmplitude: 80, //设置上下滑动最大弹性振幅度，单位为像素，默认为 80 像素，通过改变该值来调整上下移动的速度
+    debounceTime: 30, //防抖时间
+    throttleTime: 100 //滑动停止，动画时间
   };
 
   constructor(options) {
-    options = assign({}, Scroll.defaultOptions, options);
-    this.options = options;
+    let _options = assign(options);
+    Object.keys(_options).forEach((item) => {
+      if (_options[item] === undefined) {
+        delete _options[item];
+      }
+    });
+
+    _options = assign({}, Scroll.defaultOptions, _options);
+    this.options = _options;
 
     // 初始化y 坐标
     this.y = 0;
-    // scroller 区域高度值，开始取 80，防止设置太小，滚动不明显
-    this.max = options.max || 80;
-    const wrapper = options.wrapper;
+    this.maxAmplitude = _options.maxAmplitude;
+    const wrapper = _options.wrapper;
     const scroller = wrapper.children[0];
     // 包裹区域元素
     this.wrapper = wrapper;
@@ -52,10 +61,8 @@ class Scroll {
     if (options.scrollBar !== false) {
       this.scrollBar = new ScrollBar(wrapper, options.barClass);
     }
-    //防抖处理
-    this.onScrollEnd = debounce(this.onScrollEnd, 30);
-    //防止执行的太频繁
-    this.transformScrollBar = throttle(this.transformScrollBar, 100);
+    this.onScrollEnd = debounce(this.onScrollEnd, _options.debounceTime);
+    this.transformScrollBar = throttle(this.transformScrollBar, _options.throttleTime);
   }
 
   // 事件句柄
@@ -95,11 +102,11 @@ class Scroll {
   _initEvent(detach) {
     const action = detach ? 'removeEventListener' : 'addEventListener';
 
-    this.wrapper[action]('touchstart', this.handleEvent, false);
-    this.wrapper[action]('touchmove', this.handleEvent, false);
-    this.wrapper[action]('touchend', this.handleEvent, false);
-    this.wrapper[action]('touchleave', this.handleEvent, false);
-    this.wrapper[action]('touchcancel', this.handleEvent, false);
+    this.wrapper[action]('touchstart', this.handleEvent);
+    this.wrapper[action]('touchmove', this.handleEvent);
+    this.wrapper[action]('touchleave', this.handleEvent, true);
+    document[action]('touchend', this.handleEvent, true);
+    document[action]('touchcancel', this.handleEvent, true);
   }
 
   /**
@@ -109,7 +116,7 @@ class Scroll {
   refresh(noScroll) {
     const sh = this.viewHeight = this.wrapper.getBoundingClientRect().height;
     const ch = this.height = this.scroller.getBoundingClientRect().height + this.scrollerMargin;
-    //计算最小高度，可能会否
+    //计算最小高度
     this.minY = min(0, sh - ch);
     if (noScroll === true) {
       return;
@@ -127,7 +134,6 @@ class Scroll {
    * @param  {Event}  e
    */
   ontouchstart(e) {
-    e.preventDefault();
     this.speed = null;
     if (this.tween) {
       this.tween.stop();
@@ -203,8 +209,8 @@ class Scroll {
     this.calcuteSpeed(touch.clientY, down.at)
     const start = this.down.start
     let dest = start + dy
-    dest = min(dest, this.max)
-    dest = max(dest, this.minY - this.max)
+    dest = min(dest, this.maxAmplitude)
+    dest = max(dest, this.minY - this.maxAmplitude)
     this.translate(dest)
   }
 
@@ -398,6 +404,19 @@ class Scroll {
     const h = this.height
     const y = Math.round(-(vh - vh * vh / h) * this.y / (h - vh))
     this.scrollBar.translateY(y)
+  }
+
+  //
+  getScrollTop() {
+    return this.y;
+  }
+
+  getScrollHeight() {
+    return this.height;
+  }
+
+  getScrollViewHeight() {
+    return this.viewHeight;
   }
 }
 

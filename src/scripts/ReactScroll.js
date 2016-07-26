@@ -11,21 +11,24 @@ import '../sass/scroll.scss';
 class ReactScroll extends Component {
   //可能需要传入的参数
   static propTypes = {
-    children: PropTypes.node
+    children: PropTypes.node,
+    maxAmplitude: PropTypes.number
   };
 
   static defaultProps = {};
 
   componentDidMount() {
     //初始化 Scroll 实例
+    const {maxAmplitude} = this.props;
     const {wrapper} = this.refs;
     this.scroll = new Scroll({
-      wrapper
+      wrapper,
+      maxAmplitude
     });
   }
 
   componentWillUnmount() {
-    this.scroll.destroy(true);
+    this.scroll.unmount(true);
   }
 
   render() {

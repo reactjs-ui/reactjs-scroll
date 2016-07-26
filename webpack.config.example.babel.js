@@ -20,6 +20,7 @@ let webpackConfig = {
   },
   cache: true,
   debug: true,
+  devtool: 'source-map', //生成 source map文件
   stats: {
     colors: true,
     reasons: true

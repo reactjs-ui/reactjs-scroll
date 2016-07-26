@@ -509,16 +509,18 @@ var ReactScroll = function (_Component) {
     //可能需要传入的参数
     value: function componentDidMount() {
       //初始化 Scroll 实例
+      var maxAmplitude = this.props.maxAmplitude;
       var wrapper = this.refs.wrapper;
 
       this.scroll = new _Scroll2.default({
-        wrapper: wrapper
+        wrapper: wrapper,
+        maxAmplitude: maxAmplitude
       });
     }
   }, {
     key: 'componentWillUnmount',
     value: function componentWillUnmount() {
-      this.scroll.destroy(true);
+      this.scroll.unmount(true);
     }
   }, {
     key: 'render',
@@ -542,7 +544,8 @@ var ReactScroll = function (_Component) {
 }(_react.Component);
 
 ReactScroll.propTypes = {
-  children: _react.PropTypes.node
+  children: _react.PropTypes.node,
+  maxAmplitude: _react.PropTypes.number
 };
 ReactScroll.defaultProps = {};
 exports.default = ReactScroll;
@@ -610,14 +613,20 @@ var Scroll = function () {
   function Scroll(options) {
     _classCallCheck(this, Scroll);
 
-    options = (0, _assign2.default)({}, Scroll.defaultOptions, options);
-    this.options = options;
+    var _options = (0, _assign2.default)(options);
+    Object.keys(_options).forEach(function (item) {
+      if (_options[item] === undefined) {
+        delete _options[item];
+      }
+    });
+
+    _options = (0, _assign2.default)({}, Scroll.defaultOptions, _options);
+    this.options = _options;
 
     // 初始化y 坐标
     this.y = 0;
-    // scroller 区域高度值，开始取 80，防止设置太小，滚动不明显
-    this.max = options.max || 80;
-    var wrapper = options.wrapper;
+    this.maxAmplitude = _options.maxAmplitude;
+    var wrapper = _options.wrapper;
     var scroller = wrapper.children[0];
     // 包裹区域元素
     this.wrapper = wrapper;
@@ -633,10 +642,8 @@ var Scroll = function () {
     if (options.scrollBar !== false) {
       this.scrollBar = new _ScrollBar2.default(wrapper, options.barClass);
     }
-    //防抖处理
-    this.onScrollEnd = (0, _debounce2.default)(this.onScrollEnd, 30);
-    //防止执行的太频繁
-    this.transformScrollBar = (0, _throttleit2.default)(this.transformScrollBar, 100);
+    this.onScrollEnd = (0, _debounce2.default)(this.onScrollEnd, _options.debounceTime);
+    this.transformScrollBar = (0, _throttleit2.default)(this.transformScrollBar, _options.throttleTime);
   }
 
   // 事件句柄
@@ -688,11 +695,11 @@ var Scroll = function () {
     value: function _initEvent(detach) {
       var action = detach ? 'removeEventListener' : 'addEventListener';
 
-      this.wrapper[action]('touchstart', this.handleEvent, false);
-      this.wrapper[action]('touchmove', this.handleEvent, false);
-      this.wrapper[action]('touchend', this.handleEvent, false);
-      this.wrapper[action]('touchleave', this.handleEvent, false);
-      this.wrapper[action]('touchcancel', this.handleEvent, false);
+      this.wrapper[action]('touchstart', this.handleEvent);
+      this.wrapper[action]('touchmove', this.handleEvent);
+      this.wrapper[action]('touchleave', this.handleEvent, true);
+      document[action]('touchend', this.handleEvent, true);
+      document[action]('touchcancel', this.handleEvent, true);
     }
 
     /**
@@ -705,7 +712,7 @@ var Scroll = function () {
     value: function refresh(noScroll) {
       var sh = this.viewHeight = this.wrapper.getBoundingClientRect().height;
       var ch = this.height = this.scroller.getBoundingClientRect().height + this.scrollerMargin;
-      //计算最小高度，可能会否
+      //计算最小高度
       this.minY = min(0, sh - ch);
       if (noScroll === true) {
         return;
@@ -726,7 +733,6 @@ var Scroll = function () {
   }, {
     key: 'ontouchstart',
     value: function ontouchstart(e) {
-      e.preventDefault();
       this.speed = null;
       if (this.tween) {
         this.tween.stop();
@@ -804,8 +810,8 @@ var Scroll = function () {
       this.calcuteSpeed(touch.clientY, down.at);
       var start = this.down.start;
       var dest = start + dy;
-      dest = min(dest, this.max);
-      dest = max(dest, this.minY - this.max);
+      dest = min(dest, this.maxAmplitude);
+      dest = max(dest, this.minY - this.maxAmplitude);
       this.translate(dest);
     }
 
@@ -1026,13 +1032,34 @@ var Scroll = function () {
       var y = Math.round(-(vh - vh * vh / h) * this.y / (h - vh));
       this.scrollBar.translateY(y);
     }
+
+    //
+
+  }, {
+    key: 'getScrollTop',
+    value: function getScrollTop() {
+      return this.y;
+    }
+  }, {
+    key: 'getScrollHeight',
+    value: function getScrollHeight() {
+      return this.height;
+    }
+  }, {
+    key: 'getScrollViewHeight',
+    value: function getScrollViewHeight() {
+      return this.viewHeight;
+    }
   }]);
 
   return Scroll;
 }();
 
 Scroll.defaultOptions = {
-  scrollbar: true
+  scrollbar: true,
+  maxAmplitude: 80, //设置上下滑动最大弹性振幅度，单位为像素，默认为 80 像素，通过改变该值来调整上下移动的速度
+  debounceTime: 30, //防抖时间
+  throttleTime: 100 //滑动停止，动画时间
 };
 exports.default = Scroll;
 
@@ -1608,7 +1635,7 @@ exports = module.exports = __webpack_require__(21)();
 
 
 // module
-exports.push([module.i, ".rc-scroll-wrapper {\n  position: absolute;\n  top: 0;\n  left: 0;\n  right: 0;\n  bottom: 0;\n  width: 100%;\n  overflow: hidden;\n  -webkit-user-select: none;\n     -moz-user-select: none;\n      -ms-user-select: none;\n          user-select: none;\n  outline: none;\n  -webkit-tap-highlight-color: transparent;\n}\n\n.rc-scroll {\n  position: absolute;\n  z-index: 1;\n  width: 100%;\n  -webkit-transform: translateZ(0);\n          transform: translateZ(0);\n  -ms-touch-action: none;\n      touch-action: none;\n}\n\n.rc-scrollbar {\n  position: absolute;\n  right: 1px;\n  top: 0;\n  -webkit-transition: background-color 0.2s ease-out, width 0.1s ease-out, height 0.1s ease-out, -webkit-transform 0.1s ease-out;\n  transition: background-color 0.2s ease-out, width 0.1s ease-out, height 0.1s ease-out, -webkit-transform 0.1s ease-out;\n  transition: background-color 0.2s ease-out, transform 0.1s ease-out, width 0.1s ease-out, height 0.1s ease-out;\n  transition: background-color 0.2s ease-out, transform 0.1s ease-out, width 0.1s ease-out, height 0.1s ease-out, -webkit-transform 0.1s ease-out;\n  width: 2px;\n  border-radius: 1px;\n  background-color: transparent;\n  z-index: 9999;\n  height: 0;\n}\n", ""]);
+exports.push([module.i, ".rc-scroll-wrapper {\n  position: absolute;\n  top: 0;\n  left: 0;\n  right: 0;\n  bottom: 0;\n  overflow: hidden;\n  -webkit-user-select: none;\n     -moz-user-select: none;\n      -ms-user-select: none;\n          user-select: none;\n  outline: none;\n  -webkit-tap-highlight-color: transparent;\n}\n\n.rc-scroll {\n  -webkit-transform: translateZ(0);\n          transform: translateZ(0);\n  -ms-touch-action: none;\n      touch-action: none;\n}\n\n.rc-scrollbar {\n  position: absolute;\n  right: 1px;\n  top: 0;\n  -webkit-transition: background-color 0.2s ease-out, width 0.1s ease-out, height 0.1s ease-out, -webkit-transform 0.1s ease-out;\n  transition: background-color 0.2s ease-out, width 0.1s ease-out, height 0.1s ease-out, -webkit-transform 0.1s ease-out;\n  transition: background-color 0.2s ease-out, transform 0.1s ease-out, width 0.1s ease-out, height 0.1s ease-out;\n  transition: background-color 0.2s ease-out, transform 0.1s ease-out, width 0.1s ease-out, height 0.1s ease-out, -webkit-transform 0.1s ease-out;\n  width: 2px;\n  border-radius: 1px;\n  background-color: transparent;\n  z-index: 9999;\n  height: 0;\n}\n", ""]);
 
 // exports
 
