@@ -12,18 +12,24 @@ class ReactScroll extends Component {
   //可能需要传入的参数
   static propTypes = {
     children: PropTypes.node,
-    maxAmplitude: PropTypes.number
+    scrollBar: PropTypes.bool,
+    maxAmplitude: PropTypes.number,
+    debounceTime: PropTypes.number,
+    throttleTime: PropTypes.number,
   };
 
   static defaultProps = {};
 
   componentDidMount() {
     //初始化 Scroll 实例
-    const {maxAmplitude} = this.props;
+    const {scrollBar, maxAmplitude, debounceTime, throttleTime} = this.props;
     const {wrapper} = this.refs;
     this.scroll = new Scroll({
       wrapper,
-      maxAmplitude
+      scrollBar,
+      maxAmplitude,
+      debounceTime,
+      throttleTime
     });
   }
 

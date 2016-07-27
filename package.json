@@ -19,6 +19,7 @@
     "component-tween": "^1.2.0",
     "debounce": "^1.0.0",
     "lodash": "^4.14.0",
+    "mouse-wheel-event": "^1.2.3",
     "react": "^15.2.1",
     "react-dom": "^15.2.1",
     "throttleit": "^1.0.0"

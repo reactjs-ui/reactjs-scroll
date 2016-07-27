@@ -3,6 +3,7 @@ import raf from 'component-raf'
 import throttle from 'throttleit'
 import debounce from 'debounce'
 import assign from 'lodash/assign';
+import wheel from 'mouse-wheel-event'
 
 import perfect from './perfect';
 import ScrollBar from './ScrollBar'
@@ -24,7 +25,7 @@ const now = Date.now ||
 class Scroll {
   //默认属性
   static defaultOptions = {
-    scrollbar: true,
+    scrollBar: true,
     maxAmplitude: 80, //设置上下滑动最大弹性振幅度，单位为像素，默认为 80 像素，通过改变该值来调整上下移动的速度
     debounceTime: 30, //防抖时间
     throttleTime: 100 //滑动停止，动画时间
@@ -93,6 +94,7 @@ class Scroll {
     if (this.scrollBar) {
       this.scrollBar.unmount();
     }
+    this._wheelUnbind();
   }
 
   /**
@@ -107,6 +109,9 @@ class Scroll {
     this.wrapper[action]('touchleave', this.handleEvent, true);
     document[action]('touchend', this.handleEvent, true);
     document[action]('touchcancel', this.handleEvent, true);
+
+    //添加鼠标滚动事件，在pc 端也可以操作
+    this._wheelUnbind = wheel(this.wrapper, this.onwheel.bind(this), true);
   }
 
   /**
@@ -248,6 +253,22 @@ class Scroll {
     this.scrollTo(m.dest, m.duration, m.ease)
   }
 
+  onwheel(dx, dy) {
+    if (Math.abs(dx) > Math.abs(dy)) {
+      return
+    }
+    if (this.scrollBar) {
+      this.resizeScrollBar()
+    }
+    let y = this.y - dy
+    if (y > 0) y = 0
+    if (y < this.minY) y = this.minY
+    if (y === this.y) {
+      return
+    }
+    this.scrollTo(y, 20, 'linear')
+  }
+
   /**
    * Calculate the animate props for moveon
    *
@@ -383,7 +404,9 @@ class Scroll {
    * Hide scrollBar
    */
   hideScrollBar() {
-    if (this.scrollBar) this.scrollBar.hide()
+    if (this.scrollBar) {
+      this.scrollBar.hide()
+    }
   }
 
   /**
