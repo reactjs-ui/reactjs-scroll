@@ -7,7 +7,7 @@
 		exports["reactScroll"] = factory(require("react"));
 	else
 		root["reactScroll"] = factory(root["react"]);
-})(this, function(__WEBPACK_EXTERNAL_MODULE_46__) {
+})(this, function(__WEBPACK_EXTERNAL_MODULE_48__) {
 return /******/ (function(modules) { // webpackBootstrap
 /******/ 	// The module cache
 /******/ 	var installedModules = {};
@@ -62,15 +62,15 @@ return /******/ (function(modules) { // webpackBootstrap
 /******/ 	__webpack_require__.p = "./";
 
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 47);
+/******/ 	return __webpack_require__(__webpack_require__.s = 49);
 /******/ })
 /************************************************************************/
 /******/ ([
 /* 0 */
 /***/ function(module, exports, __webpack_require__) {
 
-var getLength = __webpack_require__(33),
-    isFunction = __webpack_require__(40),
+var getLength = __webpack_require__(34),
+    isFunction = __webpack_require__(41),
     isLength = __webpack_require__(8);
 
 /**
@@ -472,7 +472,7 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _react = __webpack_require__(46);
+var _react = __webpack_require__(48);
 
 var _react2 = _interopRequireDefault(_react);
 
@@ -480,7 +480,7 @@ var _Scroll = __webpack_require__(13);
 
 var _Scroll2 = _interopRequireDefault(_Scroll);
 
-__webpack_require__(44);
+__webpack_require__(46);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -509,12 +509,19 @@ var ReactScroll = function (_Component) {
     //可能需要传入的参数
     value: function componentDidMount() {
       //初始化 Scroll 实例
-      var maxAmplitude = this.props.maxAmplitude;
+      var _props = this.props;
+      var scrollBar = _props.scrollBar;
+      var maxAmplitude = _props.maxAmplitude;
+      var debounceTime = _props.debounceTime;
+      var throttleTime = _props.throttleTime;
       var wrapper = this.refs.wrapper;
 
       this.scroll = new _Scroll2.default({
         wrapper: wrapper,
-        maxAmplitude: maxAmplitude
+        scrollBar: scrollBar,
+        maxAmplitude: maxAmplitude,
+        debounceTime: debounceTime,
+        throttleTime: throttleTime
       });
     }
   }, {
@@ -545,7 +552,10 @@ var ReactScroll = function (_Component) {
 
 ReactScroll.propTypes = {
   children: _react.PropTypes.node,
-  maxAmplitude: _react.PropTypes.number
+  scrollBar: _react.PropTypes.bool,
+  maxAmplitude: _react.PropTypes.number,
+  debounceTime: _react.PropTypes.number,
+  throttleTime: _react.PropTypes.number
 };
 ReactScroll.defaultProps = {};
 exports.default = ReactScroll;
@@ -563,25 +573,29 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _componentTween = __webpack_require__(18);
+var _componentTween = __webpack_require__(19);
 
 var _componentTween2 = _interopRequireDefault(_componentTween);
 
-var _componentRaf = __webpack_require__(17);
+var _componentRaf = __webpack_require__(18);
 
 var _componentRaf2 = _interopRequireDefault(_componentRaf);
 
-var _throttleit = __webpack_require__(45);
+var _throttleit = __webpack_require__(47);
 
 var _throttleit2 = _interopRequireDefault(_throttleit);
 
-var _debounce = __webpack_require__(23);
+var _debounce = __webpack_require__(24);
 
 var _debounce2 = _interopRequireDefault(_debounce);
 
-var _assign = __webpack_require__(37);
+var _assign = __webpack_require__(38);
 
 var _assign2 = _interopRequireDefault(_assign);
+
+var _mouseWheelEvent = __webpack_require__(44);
+
+var _mouseWheelEvent2 = _interopRequireDefault(_mouseWheelEvent);
 
 var _perfect = __webpack_require__(15);
 
@@ -683,6 +697,7 @@ var Scroll = function () {
       if (this.scrollBar) {
         this.scrollBar.unmount();
       }
+      this._wheelUnbind();
     }
 
     /**
@@ -700,6 +715,9 @@ var Scroll = function () {
       this.wrapper[action]('touchleave', this.handleEvent, true);
       document[action]('touchend', this.handleEvent, true);
       document[action]('touchcancel', this.handleEvent, true);
+
+      //添加鼠标滚动事件，在pc 端也可以操作
+      this._wheelUnbind = (0, _mouseWheelEvent2.default)(this.wrapper, this.onwheel.bind(this), true);
     }
 
     /**
@@ -854,6 +872,23 @@ var Scroll = function () {
       var m = this.momentum();
       this.scrollTo(m.dest, m.duration, m.ease);
     }
+  }, {
+    key: 'onwheel',
+    value: function onwheel(dx, dy) {
+      if (Math.abs(dx) > Math.abs(dy)) {
+        return;
+      }
+      if (this.scrollBar) {
+        this.resizeScrollBar();
+      }
+      var y = this.y - dy;
+      if (y > 0) y = 0;
+      if (y < this.minY) y = this.minY;
+      if (y === this.y) {
+        return;
+      }
+      this.scrollTo(y, 20, 'linear');
+    }
 
     /**
      * Calculate the animate props for moveon
@@ -1004,7 +1039,9 @@ var Scroll = function () {
   }, {
     key: 'hideScrollBar',
     value: function hideScrollBar() {
-      if (this.scrollBar) this.scrollBar.hide();
+      if (this.scrollBar) {
+        this.scrollBar.hide();
+      }
     }
 
     /**
@@ -1056,7 +1093,7 @@ var Scroll = function () {
 }();
 
 Scroll.defaultOptions = {
-  scrollbar: true,
+  scrollBar: true,
   maxAmplitude: 80, //设置上下滑动最大弹性振幅度，单位为像素，默认为 80 像素，通过改变该值来调整上下移动的速度
   debounceTime: 30, //防抖时间
   throttleTime: 100 //滑动停止，动画时间
@@ -1240,6 +1277,46 @@ function clone(obj){
 /* 17 */
 /***/ function(module, exports) {
 
+var bind = window.addEventListener ? 'addEventListener' : 'attachEvent',
+    unbind = window.removeEventListener ? 'removeEventListener' : 'detachEvent',
+    prefix = bind !== 'addEventListener' ? 'on' : '';
+
+/**
+ * Bind `el` event `type` to `fn`.
+ *
+ * @param {Element} el
+ * @param {String} type
+ * @param {Function} fn
+ * @param {Boolean} capture
+ * @return {Function}
+ * @api public
+ */
+
+exports.bind = function(el, type, fn, capture){
+  el[bind](prefix + type, fn, capture || false);
+  return fn;
+};
+
+/**
+ * Unbind `el` event `type`'s callback `fn`.
+ *
+ * @param {Element} el
+ * @param {String} type
+ * @param {Function} fn
+ * @param {Boolean} capture
+ * @return {Function}
+ * @api public
+ */
+
+exports.unbind = function(el, type, fn, capture){
+  el[unbind](prefix + type, fn, capture || false);
+  return fn;
+};
+
+/***/ },
+/* 18 */
+/***/ function(module, exports) {
+
 /**
  * Expose `requestAnimationFrame()`.
  */
@@ -1277,7 +1354,7 @@ exports.cancel = function(id){
 
 
 /***/ },
-/* 18 */
+/* 19 */
 /***/ function(module, exports, __webpack_require__) {
 
 
@@ -1285,10 +1362,10 @@ exports.cancel = function(id){
  * Module dependencies.
  */
 
-var Emitter = __webpack_require__(19);
+var Emitter = __webpack_require__(20);
 var clone = __webpack_require__(16);
 var type = __webpack_require__(1);
-var ease = __webpack_require__(24);
+var ease = __webpack_require__(25);
 
 /**
  * Expose `Tween`.
@@ -1460,7 +1537,7 @@ Tween.prototype.update = function(fn){
 };
 
 /***/ },
-/* 19 */
+/* 20 */
 /***/ function(module, exports) {
 
 
@@ -1627,21 +1704,21 @@ Emitter.prototype.hasListeners = function(event){
 
 
 /***/ },
-/* 20 */
+/* 21 */
 /***/ function(module, exports, __webpack_require__) {
 
-exports = module.exports = __webpack_require__(21)();
+exports = module.exports = __webpack_require__(22)();
 // imports
 
 
 // module
-exports.push([module.i, ".rc-scroll-wrapper {\n  position: absolute;\n  top: 0;\n  left: 0;\n  right: 0;\n  bottom: 0;\n  overflow: hidden;\n  -webkit-user-select: none;\n     -moz-user-select: none;\n      -ms-user-select: none;\n          user-select: none;\n  outline: none;\n  -webkit-tap-highlight-color: transparent;\n}\n\n.rc-scroll {\n  -webkit-transform: translateZ(0);\n          transform: translateZ(0);\n  -ms-touch-action: none;\n      touch-action: none;\n}\n\n.rc-scrollbar {\n  position: absolute;\n  right: 1px;\n  top: 0;\n  -webkit-transition: background-color 0.2s ease-out, width 0.1s ease-out, height 0.1s ease-out, -webkit-transform 0.1s ease-out;\n  transition: background-color 0.2s ease-out, width 0.1s ease-out, height 0.1s ease-out, -webkit-transform 0.1s ease-out;\n  transition: background-color 0.2s ease-out, transform 0.1s ease-out, width 0.1s ease-out, height 0.1s ease-out;\n  transition: background-color 0.2s ease-out, transform 0.1s ease-out, width 0.1s ease-out, height 0.1s ease-out, -webkit-transform 0.1s ease-out;\n  width: 2px;\n  border-radius: 1px;\n  background-color: transparent;\n  z-index: 9999;\n  height: 0;\n}\n", ""]);
+exports.push([module.i, ".rc-scroll-wrapper {\n  position: absolute;\n  top: 0;\n  left: 0;\n  right: 0;\n  bottom: 0;\n  overflow-x: hidden;\n  overflow-y: scroll;\n  -webkit-user-select: none;\n     -moz-user-select: none;\n      -ms-user-select: none;\n          user-select: none;\n  outline: none;\n  -webkit-tap-highlight-color: transparent;\n}\n\n.rc-scroll {\n  -webkit-transform: translateZ(0);\n          transform: translateZ(0);\n  -ms-touch-action: none;\n      touch-action: none;\n}\n\n.rc-scrollbar {\n  position: absolute;\n  right: 1px;\n  top: 0;\n  -webkit-transition: background-color 0.2s ease-out, width 0.1s ease-out, height 0.1s ease-out, -webkit-transform 0.1s ease-out;\n  transition: background-color 0.2s ease-out, width 0.1s ease-out, height 0.1s ease-out, -webkit-transform 0.1s ease-out;\n  transition: background-color 0.2s ease-out, transform 0.1s ease-out, width 0.1s ease-out, height 0.1s ease-out;\n  transition: background-color 0.2s ease-out, transform 0.1s ease-out, width 0.1s ease-out, height 0.1s ease-out, -webkit-transform 0.1s ease-out;\n  width: 2px;\n  border-radius: 1px;\n  background-color: transparent;\n  z-index: 9999;\n  height: 0;\n}\n", ""]);
 
 // exports
 
 
 /***/ },
-/* 21 */
+/* 22 */
 /***/ function(module, exports) {
 
 /*
@@ -1697,7 +1774,7 @@ module.exports = function() {
 
 
 /***/ },
-/* 22 */
+/* 23 */
 /***/ function(module, exports) {
 
 module.exports = Date.now || now
@@ -1708,7 +1785,7 @@ function now() {
 
 
 /***/ },
-/* 23 */
+/* 24 */
 /***/ function(module, exports, __webpack_require__) {
 
 
@@ -1716,7 +1793,7 @@ function now() {
  * Module dependencies.
  */
 
-var now = __webpack_require__(22);
+var now = __webpack_require__(23);
 
 /**
  * Returns a function, that, as long as it continues to be invoked, will not
@@ -1767,7 +1844,7 @@ module.exports = function debounce(func, wait, immediate){
 
 
 /***/ },
-/* 24 */
+/* 25 */
 /***/ function(module, exports) {
 
 
@@ -1943,7 +2020,7 @@ exports['in-out-bounce'] = exports.inOutBounce;
 
 
 /***/ },
-/* 25 */
+/* 26 */
 /***/ function(module, exports) {
 
 /**
@@ -1970,10 +2047,10 @@ module.exports = apply;
 
 
 /***/ },
-/* 26 */
+/* 27 */
 /***/ function(module, exports, __webpack_require__) {
 
-var getPrototype = __webpack_require__(34);
+var getPrototype = __webpack_require__(35);
 
 /** Used for built-in method references. */
 var objectProto = Object.prototype;
@@ -2002,7 +2079,7 @@ module.exports = baseHas;
 
 
 /***/ },
-/* 27 */
+/* 28 */
 /***/ function(module, exports, __webpack_require__) {
 
 var overArg = __webpack_require__(5);
@@ -2024,7 +2101,7 @@ module.exports = baseKeys;
 
 
 /***/ },
-/* 28 */
+/* 29 */
 /***/ function(module, exports) {
 
 /**
@@ -2044,10 +2121,10 @@ module.exports = baseProperty;
 
 
 /***/ },
-/* 29 */
+/* 30 */
 /***/ function(module, exports, __webpack_require__) {
 
-var apply = __webpack_require__(25);
+var apply = __webpack_require__(26);
 
 /* Built-in method references for those with the same name as other `lodash` methods. */
 var nativeMax = Math.max;
@@ -2085,7 +2162,7 @@ module.exports = baseRest;
 
 
 /***/ },
-/* 30 */
+/* 31 */
 /***/ function(module, exports) {
 
 /**
@@ -2111,7 +2188,7 @@ module.exports = baseTimes;
 
 
 /***/ },
-/* 31 */
+/* 32 */
 /***/ function(module, exports, __webpack_require__) {
 
 var assignValue = __webpack_require__(2);
@@ -2148,11 +2225,11 @@ module.exports = copyObject;
 
 
 /***/ },
-/* 32 */
+/* 33 */
 /***/ function(module, exports, __webpack_require__) {
 
-var baseRest = __webpack_require__(29),
-    isIterateeCall = __webpack_require__(36);
+var baseRest = __webpack_require__(30),
+    isIterateeCall = __webpack_require__(37);
 
 /**
  * Creates a function like `_.assign`.
@@ -2191,10 +2268,10 @@ module.exports = createAssigner;
 
 
 /***/ },
-/* 33 */
+/* 34 */
 /***/ function(module, exports, __webpack_require__) {
 
-var baseProperty = __webpack_require__(28);
+var baseProperty = __webpack_require__(29);
 
 /**
  * Gets the "length" property value of `object`.
@@ -2213,7 +2290,7 @@ module.exports = getLength;
 
 
 /***/ },
-/* 34 */
+/* 35 */
 /***/ function(module, exports, __webpack_require__) {
 
 var overArg = __webpack_require__(5);
@@ -2234,14 +2311,14 @@ module.exports = getPrototype;
 
 
 /***/ },
-/* 35 */
+/* 36 */
 /***/ function(module, exports, __webpack_require__) {
 
-var baseTimes = __webpack_require__(30),
-    isArguments = __webpack_require__(38),
+var baseTimes = __webpack_require__(31),
+    isArguments = __webpack_require__(39),
     isArray = __webpack_require__(7),
     isLength = __webpack_require__(8),
-    isString = __webpack_require__(41);
+    isString = __webpack_require__(42);
 
 /**
  * Creates an array of index keys for `object` values of arrays,
@@ -2264,7 +2341,7 @@ module.exports = indexKeys;
 
 
 /***/ },
-/* 36 */
+/* 37 */
 /***/ function(module, exports, __webpack_require__) {
 
 var eq = __webpack_require__(6),
@@ -2300,15 +2377,15 @@ module.exports = isIterateeCall;
 
 
 /***/ },
-/* 37 */
+/* 38 */
 /***/ function(module, exports, __webpack_require__) {
 
 var assignValue = __webpack_require__(2),
-    copyObject = __webpack_require__(31),
-    createAssigner = __webpack_require__(32),
+    copyObject = __webpack_require__(32),
+    createAssigner = __webpack_require__(33),
     isArrayLike = __webpack_require__(0),
     isPrototype = __webpack_require__(4),
-    keys = __webpack_require__(42);
+    keys = __webpack_require__(43);
 
 /** Used for built-in method references. */
 var objectProto = Object.prototype;
@@ -2370,10 +2447,10 @@ module.exports = assign;
 
 
 /***/ },
-/* 38 */
+/* 39 */
 /***/ function(module, exports, __webpack_require__) {
 
-var isArrayLikeObject = __webpack_require__(39);
+var isArrayLikeObject = __webpack_require__(40);
 
 /** `Object#toString` result references. */
 var argsTag = '[object Arguments]';
@@ -2422,7 +2499,7 @@ module.exports = isArguments;
 
 
 /***/ },
-/* 39 */
+/* 40 */
 /***/ function(module, exports, __webpack_require__) {
 
 var isArrayLike = __webpack_require__(0),
@@ -2461,7 +2538,7 @@ module.exports = isArrayLikeObject;
 
 
 /***/ },
-/* 40 */
+/* 41 */
 /***/ function(module, exports, __webpack_require__) {
 
 var isObject = __webpack_require__(9);
@@ -2509,7 +2586,7 @@ module.exports = isFunction;
 
 
 /***/ },
-/* 41 */
+/* 42 */
 /***/ function(module, exports, __webpack_require__) {
 
 var isArray = __webpack_require__(7),
@@ -2554,12 +2631,12 @@ module.exports = isString;
 
 
 /***/ },
-/* 42 */
+/* 43 */
 /***/ function(module, exports, __webpack_require__) {
 
-var baseHas = __webpack_require__(26),
-    baseKeys = __webpack_require__(27),
-    indexKeys = __webpack_require__(35),
+var baseHas = __webpack_require__(27),
+    baseKeys = __webpack_require__(28),
+    indexKeys = __webpack_require__(36),
     isArrayLike = __webpack_require__(0),
     isIndex = __webpack_require__(3),
     isPrototype = __webpack_require__(4);
@@ -2616,7 +2693,83 @@ module.exports = keys;
 
 
 /***/ },
-/* 43 */
+/* 44 */
+/***/ function(module, exports, __webpack_require__) {
+
+"use strict";
+'use strict'
+var event = __webpack_require__(17)
+
+// detect available wheel event
+var support = 'onwheel' in document.createElement('div') ? 'wheel' : // Modern browsers support "wheel"
+        document.onmousewheel !== undefined ? 'mousewheel' : // Webkit and IE support at least "mousewheel"
+        'DOMMouseScroll'
+
+module.exports = function( elem, callback, useCapture ) {
+  // handle MozMousePixelScroll in older Firefox
+  if( support == 'DOMMouseScroll' ) {
+    return _addWheelListener( elem, 'MozMousePixelScroll', callback, useCapture )
+  } else {
+    return _addWheelListener( elem, support, callback, useCapture )
+  }
+}
+
+function _addWheelListener( elem, eventName, callback, noscroll ) {
+  var lineHeight = getLineHeight(elem)
+  function cb(e) {
+    if (noscroll) e.preventDefault ?  e.preventDefault() : e.returnValue = false
+    if (support == 'wheel') return callback(e.deltaX, e.deltaY, e.deltaZ, e)
+    !e && ( e = window.event )
+    var dx = e.deltaX || 0
+    var dy = e.deltaY || 0
+    var dz = e.deltaZ || 0
+
+    var mode = e.deltaMode
+    var scale = 1
+    switch(mode) {
+      case 1:
+        scale = lineHeight
+      break
+      case 2:
+        scale = window.innerHeight
+      break
+    }
+    dx *= scale
+    dy *= scale
+    dz *= scale
+
+    // calculate deltaY (and deltaX) according to the event
+    if ( support == 'mousewheel' ) {
+        dy = - 1/40 * e.wheelDelta
+        // Webkit also support wheelDeltaX
+        dx && ( e.deltaX = - 1/40 * e.wheelDeltaX )
+    } else if (dy === 0) {
+        dy = e.detail
+    }
+
+    // it's time to fire the callback
+    return callback(dx, dy, dz, e)
+  }
+  event.bind(elem, eventName, cb, false)
+  return function () {
+    event.unbind(elem, eventName, cb, false)
+  }
+}
+
+function getLineHeight(element){
+  if (element.parentNode == null) return 18
+  var temp = document.createElement(element.nodeName)
+  temp.setAttribute('style', 'margin:0px;padding:0px;font-size:' + element.style.fontSize)
+  temp.innerHTML = 't'
+  temp = element.parentNode.appendChild(temp)
+  var h = temp.clientHeight
+  temp.parentNode.removeChild(temp)
+  return h
+}
+
+
+/***/ },
+/* 45 */
 /***/ function(module, exports) {
 
 /*
@@ -2868,16 +3021,16 @@ function updateLink(linkElement, obj) {
 
 
 /***/ },
-/* 44 */
+/* 46 */
 /***/ function(module, exports, __webpack_require__) {
 
 // style-loader: Adds some css to the DOM by adding a <style> tag
 
 // load the styles
-var content = __webpack_require__(20);
+var content = __webpack_require__(21);
 if(typeof content === 'string') content = [[module.i, content, '']];
 // add the styles to the DOM
-var update = __webpack_require__(43)(content, {});
+var update = __webpack_require__(45)(content, {});
 if(content.locals) module.exports = content.locals;
 // Hot Module Replacement
 if(false) {
@@ -2894,7 +3047,7 @@ if(false) {
 }
 
 /***/ },
-/* 45 */
+/* 47 */
 /***/ function(module, exports) {
 
 module.exports = throttle;
@@ -2932,13 +3085,13 @@ function throttle (func, wait) {
 
 
 /***/ },
-/* 46 */
+/* 48 */
 /***/ function(module, exports) {
 
-module.exports = __WEBPACK_EXTERNAL_MODULE_46__;
+module.exports = __WEBPACK_EXTERNAL_MODULE_48__;
 
 /***/ },
-/* 47 */
+/* 49 */
 /***/ function(module, exports, __webpack_require__) {
 
 module.exports = __webpack_require__(11);
