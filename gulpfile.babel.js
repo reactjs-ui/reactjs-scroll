@@ -47,6 +47,12 @@ gulp.task('clean', () => {
     .pipe($.clean({force: true}));
 });
 
+//清理临时和打包目录
+gulp.task('clean:example', () => {
+  return gulp.src(['examples-dist'])
+    .pipe($.clean({force: true}));
+});
+
 // 用webpack 打包编译
 /*eslint-disable camelcase*/
 gulp.task('webpack:build', () => {
@@ -107,7 +113,7 @@ gulp.task('example', () => {
 });
 
 //打包编译例子
-gulp.task('example:build', () => {
+gulp.task('example:build', ['clean:example'], () => {
   const compiler = webpack(exampleDistConfig);
   // run webpack
   compiler.run((err, stats) => {

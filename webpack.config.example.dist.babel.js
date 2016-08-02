@@ -53,12 +53,21 @@ let webpackConfig = {
   },
 
   plugins: [
+    //http://dev.topheman.com/make-your-react-production-minified-version-with-webpack/
+    new webpack.DefinePlugin({
+      'process.env': {
+        NODE_ENV: JSON.stringify('production')
+      }
+    }),
     // http://webpack.github.io/docs/list-of-plugins.html#dedupeplugin
     // 相当于命令参数 --optimize-dedupe 消除冗余的或重复的代码
     new webpack.optimize.DedupePlugin(),
     // http://webpack.github.io/docs/list-of-plugins.html#uglifyjsplugin
     // 相当于命令参数 --optimize-minimize
     new webpack.optimize.UglifyJsPlugin({
+      compress: {
+        warnings: true
+      },
       mangle: {
         except: [] // 设置不混淆变量名
       }
