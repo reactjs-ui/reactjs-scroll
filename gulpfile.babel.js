@@ -5,6 +5,7 @@ import WebpackDevServer from 'webpack-dev-server';
 import opn from 'opn';
 import baseConfig from './webpack.config.babel';
 import exampleConfig from './webpack.config.example.babel';
+import exampleDistConfig from './webpack.config.example.dist.babel';
 
 const {webpackConfig, ip, port} = exampleConfig;
 const $ = gulpLoadPlugins();
@@ -105,6 +106,19 @@ gulp.task('example', () => {
     });
 });
 
+//打包编译例子
+gulp.task('example:build', () => {
+  const compiler = webpack(exampleDistConfig);
+  // run webpack
+  compiler.run((err, stats) => {
+    if (err) {
+      throw new $.util.PluginError('example:build', err);
+    }
+    $.util.log('[example:build]', stats.toString({
+      colors: true
+    }));
+  });
+});
 
 //默认任务
 gulp.task('default', () => {

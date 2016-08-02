@@ -1,4 +1,4 @@
-/**!
+/**
  * React Scroll 组件
  * 参考
  * https://github.com/chemzqm/iscroll
@@ -11,25 +11,27 @@ import '../sass/scroll.scss';
 class ReactScroll extends Component {
   //可能需要传入的参数
   static propTypes = {
-    children: PropTypes.node,
-    scrollBar: PropTypes.bool,
-    maxAmplitude: PropTypes.number,
-    debounceTime: PropTypes.number,
-    throttleTime: PropTypes.number,
+    children: PropTypes.node, //待渲染的内容
+    scrollBar: PropTypes.bool, // 是否显示滚动条
+    maxAmplitude: PropTypes.number, // 设置上下滑动最大弹性振幅度，单位为像素，默认为 80 像素
+    debounceTime: PropTypes.number, // 设置防抖时间
+    throttleTime: PropTypes.number, // 设置滑动条移动频率，值越大，移动的越缓慢
+    deceleration: PropTypes.number, // 设置弹性滑动持续时间，即滑动停止时，弹性持续的时间，值越大，持续时间越短
   };
 
   static defaultProps = {};
 
   componentDidMount() {
     //初始化 Scroll 实例
-    const {scrollBar, maxAmplitude, debounceTime, throttleTime} = this.props;
+    const {scrollBar, maxAmplitude, debounceTime, throttleTime, deceleration} = this.props;
     const {wrapper} = this.refs;
     this.scroll = new Scroll({
       wrapper,
       scrollBar,
       maxAmplitude,
       debounceTime,
-      throttleTime
+      throttleTime,
+      deceleration
     });
   }
 

@@ -4,8 +4,7 @@ import throttle from 'throttleit'
 import debounce from 'debounce'
 import assign from 'lodash/assign';
 import wheel from 'mouse-wheel-event'
-
-import perfect from './perfect';
+import {getStyles} from 'perfect-dom/lib/style';
 import ScrollBar from './ScrollBar'
 
 // 函数
@@ -26,9 +25,10 @@ class Scroll {
   //默认属性
   static defaultOptions = {
     scrollBar: true,
-    maxAmplitude: 80, //设置上下滑动最大弹性振幅度，单位为像素，默认为 80 像素，通过改变该值来调整上下移动的速度
+    maxAmplitude: 80, //设置上下滑动最大弹性振幅度，单位为像素，默认为 80 像素
     debounceTime: 30, //防抖时间
-    throttleTime: 100 //滑动停止，动画时间
+    throttleTime: 100, //滑动条移动频率，值越大，移动的越缓慢
+    deceleration: 0.001 //设置弹性滑动持续时间，即滑动停止时，弹性持续的时间
   };
 
   constructor(options) {
@@ -51,8 +51,8 @@ class Scroll {
     this.wrapper = wrapper;
     // 内层元素
     this.scroller = scroller;
-    this.scrollerMargin = parseInt(perfect.getStyles(this.scroller, 'marginBottom'), 10)
-      + parseInt(perfect.getStyles(this.scroller, 'marginTop'), 10);
+    this.scrollerMargin = parseInt(getStyles(this.scroller, 'marginBottom'), 10)
+      + parseInt(getStyles(this.scroller, 'marginTop'), 10);
 
     this.handleEvent = this.handleEvent.bind(this);
     this._initEvent();
@@ -107,8 +107,8 @@ class Scroll {
     this.wrapper[action]('touchstart', this.handleEvent);
     this.wrapper[action]('touchmove', this.handleEvent);
     this.wrapper[action]('touchleave', this.handleEvent, true);
-    document[action]('touchend', this.handleEvent, true);
-    document[action]('touchcancel', this.handleEvent, true);
+    this.wrapper[action]('touchend', this.handleEvent, true);
+    this.wrapper[action]('touchcancel', this.handleEvent, true);
 
     //添加鼠标滚动事件，在pc 端也可以操作
     this._wheelUnbind = wheel(this.wrapper, this.onwheel.bind(this), true);
@@ -275,7 +275,7 @@ class Scroll {
    * @return {Object}
    */
   momentum() {
-    const deceleration = 0.001
+    const deceleration = this.options.deceleration;
     let speed = this.speed
     speed = min(speed, 2)
     const y = this.y
@@ -429,7 +429,10 @@ class Scroll {
     this.scrollBar.translateY(y)
   }
 
-  //
+  /**
+   *
+   * @returns {number|*}
+   */
   getScrollTop() {
     return this.y;
   }

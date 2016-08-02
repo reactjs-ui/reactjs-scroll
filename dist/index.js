@@ -69,8 +69,8 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 0 */
 /***/ function(module, exports, __webpack_require__) {
 
-var getLength = __webpack_require__(34),
-    isFunction = __webpack_require__(41),
+var getLength = __webpack_require__(33),
+    isFunction = __webpack_require__(40),
     isLength = __webpack_require__(8);
 
 /**
@@ -488,7 +488,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
 function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
 
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; } /**!
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; } /**
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 * React Scroll 组件
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 * 参考
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 * https://github.com/chemzqm/iscroll
@@ -514,6 +514,7 @@ var ReactScroll = function (_Component) {
       var maxAmplitude = _props.maxAmplitude;
       var debounceTime = _props.debounceTime;
       var throttleTime = _props.throttleTime;
+      var deceleration = _props.deceleration;
       var wrapper = this.refs.wrapper;
 
       this.scroll = new _Scroll2.default({
@@ -521,7 +522,8 @@ var ReactScroll = function (_Component) {
         scrollBar: scrollBar,
         maxAmplitude: maxAmplitude,
         debounceTime: debounceTime,
-        throttleTime: throttleTime
+        throttleTime: throttleTime,
+        deceleration: deceleration
       });
     }
   }, {
@@ -551,12 +553,12 @@ var ReactScroll = function (_Component) {
 }(_react.Component);
 
 ReactScroll.propTypes = {
-  children: _react.PropTypes.node,
-  scrollBar: _react.PropTypes.bool,
-  maxAmplitude: _react.PropTypes.number,
-  debounceTime: _react.PropTypes.number,
-  throttleTime: _react.PropTypes.number
-};
+  children: _react.PropTypes.node, //待渲染的内容
+  scrollBar: _react.PropTypes.bool, // 是否显示滚动条
+  maxAmplitude: _react.PropTypes.number, // 设置上下滑动最大弹性振幅度，单位为像素，默认为 80 像素
+  debounceTime: _react.PropTypes.number, // 设置防抖时间
+  throttleTime: _react.PropTypes.number, // 设置滑动条移动频率，值越大，移动的越缓慢
+  deceleration: _react.PropTypes.number };
 ReactScroll.defaultProps = {};
 exports.default = ReactScroll;
 
@@ -573,11 +575,11 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _componentTween = __webpack_require__(19);
+var _componentTween = __webpack_require__(18);
 
 var _componentTween2 = _interopRequireDefault(_componentTween);
 
-var _componentRaf = __webpack_require__(18);
+var _componentRaf = __webpack_require__(17);
 
 var _componentRaf2 = _interopRequireDefault(_componentRaf);
 
@@ -585,21 +587,19 @@ var _throttleit = __webpack_require__(47);
 
 var _throttleit2 = _interopRequireDefault(_throttleit);
 
-var _debounce = __webpack_require__(24);
+var _debounce = __webpack_require__(23);
 
 var _debounce2 = _interopRequireDefault(_debounce);
 
-var _assign = __webpack_require__(38);
+var _assign = __webpack_require__(37);
 
 var _assign2 = _interopRequireDefault(_assign);
 
-var _mouseWheelEvent = __webpack_require__(44);
+var _mouseWheelEvent = __webpack_require__(43);
 
 var _mouseWheelEvent2 = _interopRequireDefault(_mouseWheelEvent);
 
-var _perfect = __webpack_require__(15);
-
-var _perfect2 = _interopRequireDefault(_perfect);
+var _style = __webpack_require__(44);
 
 var _ScrollBar = __webpack_require__(14);
 
@@ -646,7 +646,7 @@ var Scroll = function () {
     this.wrapper = wrapper;
     // 内层元素
     this.scroller = scroller;
-    this.scrollerMargin = parseInt(_perfect2.default.getStyles(this.scroller, 'marginBottom'), 10) + parseInt(_perfect2.default.getStyles(this.scroller, 'marginTop'), 10);
+    this.scrollerMargin = parseInt((0, _style.getStyles)(this.scroller, 'marginBottom'), 10) + parseInt((0, _style.getStyles)(this.scroller, 'marginTop'), 10);
 
     this.handleEvent = this.handleEvent.bind(this);
     this._initEvent();
@@ -713,8 +713,8 @@ var Scroll = function () {
       this.wrapper[action]('touchstart', this.handleEvent);
       this.wrapper[action]('touchmove', this.handleEvent);
       this.wrapper[action]('touchleave', this.handleEvent, true);
-      document[action]('touchend', this.handleEvent, true);
-      document[action]('touchcancel', this.handleEvent, true);
+      this.wrapper[action]('touchend', this.handleEvent, true);
+      this.wrapper[action]('touchcancel', this.handleEvent, true);
 
       //添加鼠标滚动事件，在pc 端也可以操作
       this._wheelUnbind = (0, _mouseWheelEvent2.default)(this.wrapper, this.onwheel.bind(this), true);
@@ -899,7 +899,7 @@ var Scroll = function () {
   }, {
     key: 'momentum',
     value: function momentum() {
-      var deceleration = 0.001;
+      var deceleration = this.options.deceleration;
       var speed = this.speed;
       speed = min(speed, 2);
       var y = this.y;
@@ -1070,7 +1070,10 @@ var Scroll = function () {
       this.scrollBar.translateY(y);
     }
 
-    //
+    /**
+     *
+     * @returns {number|*}
+     */
 
   }, {
     key: 'getScrollTop',
@@ -1094,9 +1097,10 @@ var Scroll = function () {
 
 Scroll.defaultOptions = {
   scrollBar: true,
-  maxAmplitude: 80, //设置上下滑动最大弹性振幅度，单位为像素，默认为 80 像素，通过改变该值来调整上下移动的速度
+  maxAmplitude: 80, //设置上下滑动最大弹性振幅度，单位为像素，默认为 80 像素
   debounceTime: 30, //防抖时间
-  throttleTime: 100 //滑动停止，动画时间
+  throttleTime: 100, //滑动条移动频率，值越大，移动的越缓慢
+  deceleration: 0.001 //设置弹性滑动持续时间，即滑动停止时，弹性持续的时间
 };
 exports.default = Scroll;
 
@@ -1183,35 +1187,6 @@ exports.default = ScrollBar;
 
 /***/ },
 /* 15 */
-/***/ function(module, exports) {
-
-"use strict";
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-var perfect = {
-  /**
-   * getStyles
-   * @param {type} element
-   * @param {type} property
-   * @returns {styles}
-   */
-  getStyles: function getStyles(element, property) {
-    var styles = element.ownerDocument.defaultView.getComputedStyle(element, null);
-    if (property) {
-      return styles.getPropertyValue(property) || styles[property];
-    }
-    return styles;
-  }
-
-};
-
-exports.default = perfect;
-
-/***/ },
-/* 16 */
 /***/ function(module, exports, __webpack_require__) {
 
 /**
@@ -1274,7 +1249,7 @@ function clone(obj){
 
 
 /***/ },
-/* 17 */
+/* 16 */
 /***/ function(module, exports) {
 
 var bind = window.addEventListener ? 'addEventListener' : 'attachEvent',
@@ -1314,7 +1289,7 @@ exports.unbind = function(el, type, fn, capture){
 };
 
 /***/ },
-/* 18 */
+/* 17 */
 /***/ function(module, exports) {
 
 /**
@@ -1354,7 +1329,7 @@ exports.cancel = function(id){
 
 
 /***/ },
-/* 19 */
+/* 18 */
 /***/ function(module, exports, __webpack_require__) {
 
 
@@ -1362,10 +1337,10 @@ exports.cancel = function(id){
  * Module dependencies.
  */
 
-var Emitter = __webpack_require__(20);
-var clone = __webpack_require__(16);
+var Emitter = __webpack_require__(19);
+var clone = __webpack_require__(15);
 var type = __webpack_require__(1);
-var ease = __webpack_require__(25);
+var ease = __webpack_require__(24);
 
 /**
  * Expose `Tween`.
@@ -1537,7 +1512,7 @@ Tween.prototype.update = function(fn){
 };
 
 /***/ },
-/* 20 */
+/* 19 */
 /***/ function(module, exports) {
 
 
@@ -1704,21 +1679,21 @@ Emitter.prototype.hasListeners = function(event){
 
 
 /***/ },
-/* 21 */
+/* 20 */
 /***/ function(module, exports, __webpack_require__) {
 
-exports = module.exports = __webpack_require__(22)();
+exports = module.exports = __webpack_require__(21)();
 // imports
 
 
 // module
-exports.push([module.i, ".rc-scroll-wrapper {\n  position: absolute;\n  top: 0;\n  left: 0;\n  right: 0;\n  bottom: 0;\n  overflow-x: hidden;\n  overflow-y: scroll;\n  -webkit-user-select: none;\n     -moz-user-select: none;\n      -ms-user-select: none;\n          user-select: none;\n  outline: none;\n  -webkit-tap-highlight-color: transparent;\n}\n\n.rc-scroll {\n  -webkit-transform: translateZ(0);\n          transform: translateZ(0);\n  -ms-touch-action: none;\n      touch-action: none;\n}\n\n.rc-scrollbar {\n  position: absolute;\n  right: 1px;\n  top: 0;\n  -webkit-transition: background-color 0.2s ease-out, width 0.1s ease-out, height 0.1s ease-out, -webkit-transform 0.1s ease-out;\n  transition: background-color 0.2s ease-out, width 0.1s ease-out, height 0.1s ease-out, -webkit-transform 0.1s ease-out;\n  transition: background-color 0.2s ease-out, transform 0.1s ease-out, width 0.1s ease-out, height 0.1s ease-out;\n  transition: background-color 0.2s ease-out, transform 0.1s ease-out, width 0.1s ease-out, height 0.1s ease-out, -webkit-transform 0.1s ease-out;\n  width: 2px;\n  border-radius: 1px;\n  background-color: transparent;\n  z-index: 9999;\n  height: 0;\n}\n", ""]);
+exports.push([module.i, ".rc-scroll-wrapper {\n  position: absolute;\n  top: 0;\n  left: 0;\n  right: 0;\n  bottom: 0;\n  overflow: hidden;\n  -webkit-user-select: none;\n     -moz-user-select: none;\n      -ms-user-select: none;\n          user-select: none;\n  outline: none;\n  -webkit-tap-highlight-color: transparent;\n}\n\n.rc-scroll {\n  -webkit-transform: translateZ(0);\n          transform: translateZ(0);\n  -ms-touch-action: none;\n      touch-action: none;\n}\n\n.rc-scrollbar {\n  position: absolute;\n  right: 1px;\n  top: 0;\n  -webkit-transition: background-color 0.2s ease-out, width 0.1s ease-out, height 0.1s ease-out, -webkit-transform 0.1s ease-out;\n  transition: background-color 0.2s ease-out, width 0.1s ease-out, height 0.1s ease-out, -webkit-transform 0.1s ease-out;\n  transition: background-color 0.2s ease-out, transform 0.1s ease-out, width 0.1s ease-out, height 0.1s ease-out;\n  transition: background-color 0.2s ease-out, transform 0.1s ease-out, width 0.1s ease-out, height 0.1s ease-out, -webkit-transform 0.1s ease-out;\n  width: 2px;\n  border-radius: 1px;\n  background-color: transparent;\n  z-index: 9999;\n  height: 0;\n}\n", ""]);
 
 // exports
 
 
 /***/ },
-/* 22 */
+/* 21 */
 /***/ function(module, exports) {
 
 /*
@@ -1774,7 +1749,7 @@ module.exports = function() {
 
 
 /***/ },
-/* 23 */
+/* 22 */
 /***/ function(module, exports) {
 
 module.exports = Date.now || now
@@ -1785,7 +1760,7 @@ function now() {
 
 
 /***/ },
-/* 24 */
+/* 23 */
 /***/ function(module, exports, __webpack_require__) {
 
 
@@ -1793,7 +1768,7 @@ function now() {
  * Module dependencies.
  */
 
-var now = __webpack_require__(23);
+var now = __webpack_require__(22);
 
 /**
  * Returns a function, that, as long as it continues to be invoked, will not
@@ -1844,7 +1819,7 @@ module.exports = function debounce(func, wait, immediate){
 
 
 /***/ },
-/* 25 */
+/* 24 */
 /***/ function(module, exports) {
 
 
@@ -2020,7 +1995,7 @@ exports['in-out-bounce'] = exports.inOutBounce;
 
 
 /***/ },
-/* 26 */
+/* 25 */
 /***/ function(module, exports) {
 
 /**
@@ -2047,10 +2022,10 @@ module.exports = apply;
 
 
 /***/ },
-/* 27 */
+/* 26 */
 /***/ function(module, exports, __webpack_require__) {
 
-var getPrototype = __webpack_require__(35);
+var getPrototype = __webpack_require__(34);
 
 /** Used for built-in method references. */
 var objectProto = Object.prototype;
@@ -2079,7 +2054,7 @@ module.exports = baseHas;
 
 
 /***/ },
-/* 28 */
+/* 27 */
 /***/ function(module, exports, __webpack_require__) {
 
 var overArg = __webpack_require__(5);
@@ -2101,7 +2076,7 @@ module.exports = baseKeys;
 
 
 /***/ },
-/* 29 */
+/* 28 */
 /***/ function(module, exports) {
 
 /**
@@ -2121,10 +2096,10 @@ module.exports = baseProperty;
 
 
 /***/ },
-/* 30 */
+/* 29 */
 /***/ function(module, exports, __webpack_require__) {
 
-var apply = __webpack_require__(26);
+var apply = __webpack_require__(25);
 
 /* Built-in method references for those with the same name as other `lodash` methods. */
 var nativeMax = Math.max;
@@ -2162,7 +2137,7 @@ module.exports = baseRest;
 
 
 /***/ },
-/* 31 */
+/* 30 */
 /***/ function(module, exports) {
 
 /**
@@ -2188,7 +2163,7 @@ module.exports = baseTimes;
 
 
 /***/ },
-/* 32 */
+/* 31 */
 /***/ function(module, exports, __webpack_require__) {
 
 var assignValue = __webpack_require__(2);
@@ -2225,11 +2200,11 @@ module.exports = copyObject;
 
 
 /***/ },
-/* 33 */
+/* 32 */
 /***/ function(module, exports, __webpack_require__) {
 
-var baseRest = __webpack_require__(30),
-    isIterateeCall = __webpack_require__(37);
+var baseRest = __webpack_require__(29),
+    isIterateeCall = __webpack_require__(36);
 
 /**
  * Creates a function like `_.assign`.
@@ -2268,10 +2243,10 @@ module.exports = createAssigner;
 
 
 /***/ },
-/* 34 */
+/* 33 */
 /***/ function(module, exports, __webpack_require__) {
 
-var baseProperty = __webpack_require__(29);
+var baseProperty = __webpack_require__(28);
 
 /**
  * Gets the "length" property value of `object`.
@@ -2290,7 +2265,7 @@ module.exports = getLength;
 
 
 /***/ },
-/* 35 */
+/* 34 */
 /***/ function(module, exports, __webpack_require__) {
 
 var overArg = __webpack_require__(5);
@@ -2311,14 +2286,14 @@ module.exports = getPrototype;
 
 
 /***/ },
-/* 36 */
+/* 35 */
 /***/ function(module, exports, __webpack_require__) {
 
-var baseTimes = __webpack_require__(31),
-    isArguments = __webpack_require__(39),
+var baseTimes = __webpack_require__(30),
+    isArguments = __webpack_require__(38),
     isArray = __webpack_require__(7),
     isLength = __webpack_require__(8),
-    isString = __webpack_require__(42);
+    isString = __webpack_require__(41);
 
 /**
  * Creates an array of index keys for `object` values of arrays,
@@ -2341,7 +2316,7 @@ module.exports = indexKeys;
 
 
 /***/ },
-/* 37 */
+/* 36 */
 /***/ function(module, exports, __webpack_require__) {
 
 var eq = __webpack_require__(6),
@@ -2377,15 +2352,15 @@ module.exports = isIterateeCall;
 
 
 /***/ },
-/* 38 */
+/* 37 */
 /***/ function(module, exports, __webpack_require__) {
 
 var assignValue = __webpack_require__(2),
-    copyObject = __webpack_require__(32),
-    createAssigner = __webpack_require__(33),
+    copyObject = __webpack_require__(31),
+    createAssigner = __webpack_require__(32),
     isArrayLike = __webpack_require__(0),
     isPrototype = __webpack_require__(4),
-    keys = __webpack_require__(43);
+    keys = __webpack_require__(42);
 
 /** Used for built-in method references. */
 var objectProto = Object.prototype;
@@ -2447,10 +2422,10 @@ module.exports = assign;
 
 
 /***/ },
-/* 39 */
+/* 38 */
 /***/ function(module, exports, __webpack_require__) {
 
-var isArrayLikeObject = __webpack_require__(40);
+var isArrayLikeObject = __webpack_require__(39);
 
 /** `Object#toString` result references. */
 var argsTag = '[object Arguments]';
@@ -2499,7 +2474,7 @@ module.exports = isArguments;
 
 
 /***/ },
-/* 40 */
+/* 39 */
 /***/ function(module, exports, __webpack_require__) {
 
 var isArrayLike = __webpack_require__(0),
@@ -2538,7 +2513,7 @@ module.exports = isArrayLikeObject;
 
 
 /***/ },
-/* 41 */
+/* 40 */
 /***/ function(module, exports, __webpack_require__) {
 
 var isObject = __webpack_require__(9);
@@ -2586,7 +2561,7 @@ module.exports = isFunction;
 
 
 /***/ },
-/* 42 */
+/* 41 */
 /***/ function(module, exports, __webpack_require__) {
 
 var isArray = __webpack_require__(7),
@@ -2631,12 +2606,12 @@ module.exports = isString;
 
 
 /***/ },
-/* 43 */
+/* 42 */
 /***/ function(module, exports, __webpack_require__) {
 
-var baseHas = __webpack_require__(27),
-    baseKeys = __webpack_require__(28),
-    indexKeys = __webpack_require__(36),
+var baseHas = __webpack_require__(26),
+    baseKeys = __webpack_require__(27),
+    indexKeys = __webpack_require__(35),
     isArrayLike = __webpack_require__(0),
     isIndex = __webpack_require__(3),
     isPrototype = __webpack_require__(4);
@@ -2693,12 +2668,12 @@ module.exports = keys;
 
 
 /***/ },
-/* 44 */
+/* 43 */
 /***/ function(module, exports, __webpack_require__) {
 
 "use strict";
 'use strict'
-var event = __webpack_require__(17)
+var event = __webpack_require__(16)
 
 // detect available wheel event
 var support = 'onwheel' in document.createElement('div') ? 'wheel' : // Modern browsers support "wheel"
@@ -2767,6 +2742,31 @@ function getLineHeight(element){
   return h
 }
 
+
+/***/ },
+/* 44 */
+/***/ function(module, exports) {
+
+"use strict";
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.getStyles = getStyles;
+/**
+ * getStyles
+ * @param {type} element
+ * @param {type} property
+ * @returns {styles}
+ */
+function getStyles(element, property) {
+  var styles = element.ownerDocument.defaultView.getComputedStyle(element, null);
+  if (property) {
+    return styles.getPropertyValue(property) || styles[property];
+  }
+  return styles;
+}
 
 /***/ },
 /* 45 */
@@ -3027,7 +3027,7 @@ function updateLink(linkElement, obj) {
 // style-loader: Adds some css to the DOM by adding a <style> tag
 
 // load the styles
-var content = __webpack_require__(21);
+var content = __webpack_require__(20);
 if(typeof content === 'string') content = [[module.i, content, '']];
 // add the styles to the DOM
 var update = __webpack_require__(45)(content, {});
