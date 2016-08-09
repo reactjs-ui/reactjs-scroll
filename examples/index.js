@@ -11,6 +11,9 @@ class Index extends Component {
           <li>
             <a href="./simple.html" target="_blank">基本用法</a>
           </li>
+          <li>
+            <a href="./browser.html" target="_blank">浏览器本身滚动效果</a>
+          </li>
         </ol>
       </div>
     );

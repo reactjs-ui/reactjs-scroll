@@ -515,6 +515,10 @@ var ReactScroll = function (_Component) {
       var debounceTime = _props.debounceTime;
       var throttleTime = _props.throttleTime;
       var deceleration = _props.deceleration;
+      var scrollSpeed = _props.scrollSpeed;
+      var thresholdOffset = _props.thresholdOffset;
+      var durationSpeed = _props.durationSpeed;
+      var easing = _props.easing;
       var wrapper = this.refs.wrapper;
 
       this.scroll = new _Scroll2.default({
@@ -523,7 +527,11 @@ var ReactScroll = function (_Component) {
         maxAmplitude: maxAmplitude,
         debounceTime: debounceTime,
         throttleTime: throttleTime,
-        deceleration: deceleration
+        deceleration: deceleration,
+        scrollSpeed: scrollSpeed,
+        thresholdOffset: thresholdOffset,
+        durationSpeed: durationSpeed,
+        easing: easing
       });
     }
   }, {
@@ -558,7 +566,12 @@ ReactScroll.propTypes = {
   maxAmplitude: _react.PropTypes.number, // 设置上下滑动最大弹性振幅度，单位为像素，默认为 80 像素
   debounceTime: _react.PropTypes.number, // 设置防抖时间
   throttleTime: _react.PropTypes.number, // 设置滑动条移动频率，值越大，移动的越缓慢
-  deceleration: _react.PropTypes.number };
+  deceleration: _react.PropTypes.number, // 设置弹性滑动持续时间，即滑动停止时，弹性持续的时间，值越大，持续时间越短
+  scrollSpeed: _react.PropTypes.number, // 设置滚动加速度，值越大，滚动越快
+  thresholdOffset: _react.PropTypes.number, //设置上下移动临界值，移动超过该值，则向上或向下滑动
+  durationSpeed: _react.PropTypes.number, //滑动持续时间系数，系数越大，持续的时间短
+  easing: _react.PropTypes.string //设置加速方式，默认为匀速，详情查看 https://github.com/component/ease
+};
 ReactScroll.defaultProps = {};
 exports.default = ReactScroll;
 
@@ -771,10 +784,11 @@ var Scroll = function () {
       var sx = touch.clientX;
       var sy = touch.clientY;
       var at = now();
+      var thresholdOffset = this.options.thresholdOffset;
 
       this.onstart = function (x, y) {
         // no moved up and down, so don't know
-        if (sy === y) {
+        if (Math.abs(sy - y) <= thresholdOffset) {
           return;
         }
         //更新完重置为 null
@@ -902,10 +916,12 @@ var Scroll = function () {
       var deceleration = this.options.deceleration;
       var speed = this.speed;
       speed = min(speed, 2);
+      var scrollSpeed = this.options.scrollSpeed;
+      var durationSpeed = this.options.durationSpeed;
       var y = this.y;
-      var rate = (4 - Math.PI) / 2;
+      var rate = (scrollSpeed - Math.PI) / 2;
       var destination = y + rate * (speed * speed) / (2 * deceleration) * (this.distance < 0 ? -1 : 1);
-      var duration = speed / deceleration;
+      var duration = speed / deceleration / durationSpeed;
       var ease = void 0;
       var minY = this.minY;
       if (y > 0 || y < minY) {
@@ -949,7 +965,7 @@ var Scroll = function () {
 
       this.direction = y > this.y ? -1 : 1;
 
-      easing = easing || 'out-circ';
+      easing = easing || this.options.easing;
       var tween = this.tween = (0, _componentTween2.default)({
         y: this.y
       }).ease(easing).to({
@@ -1100,7 +1116,11 @@ Scroll.defaultOptions = {
   maxAmplitude: 80, //设置上下滑动最大弹性振幅度，单位为像素，默认为 80 像素
   debounceTime: 30, //防抖时间
   throttleTime: 100, //滑动条移动频率，值越大，移动的越缓慢
-  deceleration: 0.001 //设置弹性滑动持续时间，即滑动停止时，弹性持续的时间
+  deceleration: 0.001, //设置弹性滑动持续时间，即滑动停止时，弹性持续的时间
+  thresholdOffset: 2, //设置上下移动临界值，移动超过该值，则向上或向下滑动
+  scrollSpeed: 6, // 设置滚动加速度，值越大，滚动越快
+  durationSpeed: 3, //滑动持续时间系数，系数越大，持续的时间短，
+  easing: 'linear' //设置加速方式，默认为匀速，详情查看 https://github.com/component/ease
 };
 exports.default = Scroll;
 

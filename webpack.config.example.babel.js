@@ -4,7 +4,7 @@ import HtmlwebpackPlugin from 'html-webpack-plugin';
 import precss from 'precss';
 import autoprefixer from 'autoprefixer';
 
-const ip = 'localhost';
+const ip = '10.13.83.58';
 const port = 9090;
 const hotDevServer = 'webpack/hot/dev-server';
 // https://github.com/webpack/webpack-dev-server
@@ -26,6 +26,7 @@ let webpackConfig = {
     reasons: true
   },
   devServer: {
+    //指定根目录路径，比如访问 eruda.min.js 时，只需 http://localhost:9090/eruda.min.js 即可
     contentBase: './examples',
     historyApiFallback: true,
     hot: true,
@@ -37,7 +38,6 @@ let webpackConfig = {
       poll: 1000
     },
     quiet: false, // 设为true，不把任何信息输出到控制台
-    publicPath: '/'
   },
 
   postcss () {
@@ -60,6 +60,7 @@ let webpackConfig = {
   entry: {
     index: ['./examples/index.js', webpackDevServer, hotDevServer],
     simple: ['./examples/simple.js', webpackDevServer, hotDevServer],
+    browser: ['./examples/browser.js', webpackDevServer, hotDevServer],
   },
 
   // 出口 让webpack把处理完成的文件放在哪里
@@ -111,7 +112,10 @@ const htmlwebpackPluginConfig = {
   },
   simple: {
     title: '基本用法'
-  }
+  },
+  browser: {
+    title: '基本用法'
+  },
 };
 
 for (let key in entry) {

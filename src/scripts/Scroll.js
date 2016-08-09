@@ -28,7 +28,11 @@ class Scroll {
     maxAmplitude: 80, //设置上下滑动最大弹性振幅度，单位为像素，默认为 80 像素
     debounceTime: 30, //防抖时间
     throttleTime: 100, //滑动条移动频率，值越大，移动的越缓慢
-    deceleration: 0.001 //设置弹性滑动持续时间，即滑动停止时，弹性持续的时间
+    deceleration: 0.001, //设置弹性滑动持续时间，即滑动停止时，弹性持续的时间
+    thresholdOffset: 2, //设置上下移动临界值，移动超过该值，则向上或向下滑动
+    scrollSpeed: 6, // 设置滚动加速度，值越大，滚动越快
+    durationSpeed: 3, //滑动持续时间系数，系数越大，持续的时间短，
+    easing: 'linear' //设置加速方式，默认为匀速，详情查看 https://github.com/component/ease
   };
 
   constructor(options) {
@@ -159,11 +163,11 @@ class Scroll {
     const sx = touch.clientX;
     const sy = touch.clientY;
     const at = now();
-
+    const thresholdOffset = this.options.thresholdOffset;
 
     this.onstart = function (x, y) {
       // no moved up and down, so don't know
-      if (sy === y) {
+      if (Math.abs(sy - y) <= thresholdOffset) {
         return;
       }
       //更新完重置为 null
@@ -278,10 +282,12 @@ class Scroll {
     const deceleration = this.options.deceleration;
     let speed = this.speed
     speed = min(speed, 2)
+    const scrollSpeed = this.options.scrollSpeed;
+    const durationSpeed = this.options.durationSpeed;
     const y = this.y
-    const rate = (4 - Math.PI) / 2
+    const rate = (scrollSpeed - Math.PI) / 2
     let destination = y + rate * (speed * speed) / (2 * deceleration) * (this.distance < 0 ? -1 : 1)
-    let duration = speed / deceleration
+    let duration = speed / deceleration / durationSpeed
     let ease
     const minY = this.minY
     if (y > 0 || y < minY) {
@@ -320,7 +326,7 @@ class Scroll {
 
     this.direction = y > this.y ? -1 : 1
 
-    easing = easing || 'out-circ'
+    easing = easing || this.options.easing;
     const tween = this.tween = Tween({
       y: this.y
     })
