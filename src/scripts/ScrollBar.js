@@ -20,6 +20,10 @@ class ScrollBar {
    */
   resize(height) {
     const style = this.scrollBar.style;
+    //滚动条最小高度为 20
+    if (height < 20) {
+      height = 20;
+    }
     style.height = `${height}px`
     style.backgroundColor = 'rgba(0,0,0,0.4)'
   }

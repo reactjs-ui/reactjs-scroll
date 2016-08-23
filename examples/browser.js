@@ -4,7 +4,7 @@ import {render} from 'react-dom';
 class BrowserSimple extends Component {
   render() {
     let contents = [];
-    for (let i = 0; i < 1000; i++) {
+    for (let i = 0; i < 2000; i++) {
       contents.push(<p key={i}>这里放置真实显示的DOM内容 {i}</p>);
     }
 

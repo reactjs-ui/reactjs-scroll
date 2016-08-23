@@ -26,7 +26,7 @@ class Scroll {
   static defaultOptions = {
     scrollBar: true,
     maxAmplitude: 80, //设置上下滑动最大弹性振幅度，单位为像素，默认为 80 像素
-    debounceTime: 30, //防抖时间
+    debounceTime: 50, //防抖时间
     throttleTime: 100, //滑动条移动频率，值越大，移动的越缓慢
     deceleration: 0.001, //设置弹性滑动持续时间，即滑动停止时，弹性持续的时间
     thresholdOffset: 2, //设置上下移动临界值，移动超过该值，则向上或向下滑动
@@ -130,8 +130,10 @@ class Scroll {
     if (noScroll === true) {
       return;
     }
+    //滑到最下面
     if (this.y < this.minY) {
       this.scrollTo(this.minY, 300)
+      // 滑到最上面
     } else if (this.y > 0) {
       this.scrollTo(0, 300)
     }
