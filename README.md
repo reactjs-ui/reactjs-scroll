@@ -116,6 +116,10 @@ render(
 gulp build
 ```
 
+## More React Component
+
+* [reactjs-pull-refresh](https://www.npmjs.com/package/reactjs-pull-refresh) 
+
 ## Issue
 
 https://github.com/reactjs-ui/reactjs-scroll/issues

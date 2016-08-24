@@ -1,8 +1,9 @@
 # React Scroll 更新日志
 
-## version 0.2.0  (2016-8-23)
+## version 0.4.0  (2016-8-23)
 
 * 设置滚动条最小高度值
+* 与 [reactjs-pull-refresh](https://www.npmjs.com/package/reactjs-pull-refresh) 版本保持一致
 
 ## version 0.2.0  开启 React Scroll 之旅(2016-8-9)
 
