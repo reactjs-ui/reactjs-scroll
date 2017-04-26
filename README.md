@@ -59,7 +59,7 @@ git push
 ## Usage
 
 ```javascript
-import React, {Component, PropTypes} from 'react';
+import React, {Component} from 'react';
 import {render} from 'react-dom';
 import Scroll from '../src/scripts/index';
 
@@ -126,4 +126,4 @@ https://github.com/reactjs-ui/reactjs-scroll/issues
 
 ## Version
 
-Please view [here](./VERSION.md)
+Please view [here](./CHANGELOG.md)

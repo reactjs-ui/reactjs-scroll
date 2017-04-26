@@ -4,7 +4,8 @@
  * https://github.com/chemzqm/iscroll
  */
 
-import React, {PropTypes, Component} from 'react';
+import React, {Component} from 'react';
+import PropTypes from 'prop-types';
 import Scroll from './Scroll';
 import '../sass/scroll.scss';
 

@@ -8,8 +8,8 @@ import {getStyles} from 'perfect-dom/lib/style';
 import ScrollBar from './ScrollBar'
 
 // 函数
-const max = Math.max;
-const min = Math.min;
+const {max, min} = Math;
+
 const now = Date.now ||
   function () {
     return (new Date()).getTime()
@@ -49,8 +49,8 @@ class Scroll {
     // 初始化y 坐标
     this.y = 0;
     this.maxAmplitude = _options.maxAmplitude;
-    const wrapper = _options.wrapper;
-    const scroller = wrapper.children[0];
+    const {wrapper} = _options;
+    const [scroller] = wrapper.children;
     // 包裹区域元素
     this.wrapper = wrapper;
     // 内层元素
@@ -165,7 +165,7 @@ class Scroll {
     const sx = touch.clientX;
     const sy = touch.clientY;
     const at = now();
-    const thresholdOffset = this.options.thresholdOffset;
+    const {thresholdOffset} = this.options;
 
     this.onstart = function (x, y) {
       // no moved up and down, so don't know
@@ -213,12 +213,12 @@ class Scroll {
         return
       }
     }
-    const down = this.down
-    const dy = this.dy = y - down.y
+    const {down} = this;
+    const dy = this.dy = y - down.y;
 
     //calculate speed every 100 milisecond
     this.calcuteSpeed(touch.clientY, down.at)
-    const start = this.down.start
+    const {start} = this.down;
     let dest = start + dy
     dest = min(dest, this.maxAmplitude)
     dest = max(dest, this.minY - this.maxAmplitude)
@@ -251,7 +251,7 @@ class Scroll {
    */
   ontouchend(e) {
     if (!this.down) return
-    const at = this.down.at
+    const {at} = this.down;
     this.down = null
     const touch = this.getTouch(e)
     this.calcuteSpeed(touch.clientY, at)
@@ -281,17 +281,16 @@ class Scroll {
    * @return {Object}
    */
   momentum() {
-    const deceleration = this.options.deceleration;
-    let speed = this.speed
+    const {deceleration} = this.options;
+    let {speed} = this;
     speed = min(speed, 2)
-    const scrollSpeed = this.options.scrollSpeed;
-    const durationSpeed = this.options.durationSpeed;
-    const y = this.y
+    const {scrollSpeed, durationSpeed} = this.options;
+    const {y} = this;
     const rate = (scrollSpeed - Math.PI) / 2
-    let destination = y + rate * (speed * speed) / (2 * deceleration) * (this.distance < 0 ? -1 : 1)
-    let duration = speed / deceleration / durationSpeed
+    let destination = y + (rate * speed * speed) / (2 * deceleration) * (this.distance < 0 ? -1 : 1)
+    let duration = speed / deceleration / durationSpeed;
     let ease
-    const minY = this.minY
+    const {minY} = this;
     if (y > 0 || y < minY) {
       duration = 500
       ease = 'out-circ'
@@ -338,7 +337,7 @@ class Scroll {
       })
       .duration(duration)
 
-    tween.update(o => {
+    tween.update((o) => {
       this.translate(o.y)
     });
 
@@ -347,7 +346,7 @@ class Scroll {
       tween.update()
     }
 
-    const promise = new Promise(resolve => {
+    const promise = new Promise((resolve) => {
       tween.on('end', () => {
         resolve()
         this.animating = false
@@ -373,7 +372,7 @@ class Scroll {
   getTouch(e) {
     let touch = e
     if (e.changedTouches && e.changedTouches.length > 0) {
-      touch = e.changedTouches[0]
+      [touch] = e.changedTouches;
     }
     return touch
   }
@@ -384,7 +383,7 @@ class Scroll {
    */
 
   translate(y) {
-    const style = this.scroller.style
+    const {style} = this.scroller
     if (isNaN(y)) return
     y = Math.floor(y)
     //reach the end
@@ -424,7 +423,7 @@ class Scroll {
   onScrollEnd() {
     if (this.animating) return
     this.hideScrollBar()
-    const y = this.y
+    const {y} = this;
   }
 
   /**

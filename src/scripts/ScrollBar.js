@@ -19,7 +19,7 @@ class ScrollBar {
    * @param {Number} height
    */
   resize(height) {
-    const style = this.scrollBar.style;
+    const {style} = this.scrollBar;
     //滚动条最小高度为 20
     if (height < 20) {
       height = 20;
@@ -40,7 +40,7 @@ class ScrollBar {
    * @param {Number} y
    */
   translateY(y) {
-    const style = this.scrollBar.style;
+    const {style} = this.scrollBar;
     style.webkitTransform = `translate3d(0, ${y}px, 0)`;
     style.transform = `translate3d(0, ${y}px, 0)`;
   }
