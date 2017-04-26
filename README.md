@@ -116,6 +116,12 @@ render(
 gulp build
 ```
 
+## Publish
+
+```
+npm publish
+```
+
 ## More React Component
 
 * [reactjs-pull-refresh](https://www.npmjs.com/package/reactjs-pull-refresh) 
