@@ -1,5 +1,11 @@
 # React Scroll 更新日志
 
+## version 0.5.1  (2017-9-20)
+
+* 升级更新 node 依赖包
+* 升级到 webpack 3 后修改打包配置
+* 修复 bug #2
+
 ## version 0.5.0  (2017-4-26)
 
 * 升级更新 node 依赖包
