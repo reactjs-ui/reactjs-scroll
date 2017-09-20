@@ -146,6 +146,7 @@ class Scroll {
    */
   ontouchstart(e) {
     this.speed = null;
+    this.down = null;
     if (this.tween) {
       this.tween.stop();
     }
