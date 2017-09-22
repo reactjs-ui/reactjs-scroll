@@ -61,7 +61,9 @@ git push
 ```javascript
 import React, {Component} from 'react';
 import {render} from 'react-dom';
-import Scroll from '../src/scripts/index';
+import Scroll from 'reactjs-scroll';
+import 'reactjs-scroll/sass/scroll.scss';
+// 或者 import 'reactjs-scroll/styles/scroll.css';
 
 class ScrollSimple extends Component {
   render() {

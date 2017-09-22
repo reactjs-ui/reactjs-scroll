@@ -47,7 +47,7 @@ const webpackConfig = {
 
   // 出口 让webpack把处理完成的文件放在哪里
   output: {
-    path: path.resolve(__dirname, 'examples/dist'), //打包输出目录
+    path: path.resolve(__dirname, 'examples/build'), //打包输出目录
     filename: '[name].[hash].bundle.js', //文件名称
     publicPath: './' //资源路径
   },

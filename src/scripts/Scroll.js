@@ -2,7 +2,6 @@ import Tween from 'component-tween'
 import raf from 'component-raf'
 import throttle from 'throttleit'
 import debounce from 'debounce'
-import assign from 'lodash/assign';
 import wheel from 'mouse-wheel-event'
 import {getStyles} from 'perfect-dom/lib/style';
 import ScrollBar from './ScrollBar'
@@ -36,14 +35,14 @@ class Scroll {
   };
 
   constructor(options) {
-    let _options = assign(options);
+    let _options = {...options};
     Object.keys(_options).forEach((item) => {
       if (_options[item] === undefined) {
         delete _options[item];
       }
     });
 
-    _options = assign({}, Scroll.defaultOptions, _options);
+    _options = {...Scroll.defaultOptions, ..._options};
     this.options = _options;
 
     // 初始化y 坐标

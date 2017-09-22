@@ -1,8 +1,10 @@
+import childProcess from 'child_process';
 import gulp from 'gulp';
 import gulpLoadPlugins from 'gulp-load-plugins';
 import webpack from 'webpack';
 import WebpackDevServer from 'webpack-dev-server';
 import opn from 'opn';
+import chalk from 'chalk';
 import baseConfig from './webpack.config.babel';
 import exampleConfig from './webpack.config.example.babel';
 import exampleDistConfig from './webpack.config.example.dist.babel';
@@ -43,7 +45,7 @@ gulp.task('sass', () => {
 
 //清理临时和打包目录
 gulp.task('clean', () => {
-  return gulp.src(['dist'])
+  return gulp.src(['build'])
     .pipe($.clean({force: true}));
 });
 
@@ -56,7 +58,7 @@ gulp.task('clean:example', () => {
 // 用webpack 打包编译
 /*eslint-disable camelcase*/
 gulp.task('webpack:build', () => {
-  let config = Object.create(baseConfig);
+  const config = Object.create(baseConfig);
   config.plugins.push(
     new webpack.DefinePlugin({
       'process.env.NODE_ENV': JSON.stringify('production')
@@ -69,7 +71,8 @@ gulp.task('webpack:build', () => {
     config.plugins.push(
       new webpack.optimize.UglifyJsPlugin({
         compressor: {
-          screw_ie8: true,
+          /*eslint-disable camelcase*/
+          drop_console: true, // 正式环境去掉 console
           warnings: false
         },
         mangle: {
@@ -82,13 +85,8 @@ gulp.task('webpack:build', () => {
   });
 });
 
-gulp.task('copy', ['clean', 'sass'], () => {
-  return gulp.src('src/styles/modal.css')
-    .pipe(gulp.dest('dist/styles'));
-});
-
 //把 es6 解析为 es5
-gulp.task('build', ['copy'], () => {
+gulp.task('build', () => {
   gulp.start(['webpack:build']);
 });
 
@@ -123,6 +121,24 @@ gulp.task('example:build', ['clean:example'], () => {
     $.util.log('[example:build]', stats.toString({
       colors: true
     }));
+  });
+});
+
+// publish npm
+gulp.task('publish', () => {
+  const {exec} = childProcess;
+  exec('npm run publish-pre && cd build && npm publish', (error, stdout, stderr) => {
+    if (error) {
+      console.log(chalk.magenta(error));
+
+      return;
+    }
+    if (stdout) {
+      console.log(chalk.magenta(`stdout: ${stdout}`));
+    }
+    if (stderr) {
+      console.log(chalk.magenta(`stderr: ${stderr}`));
+    }
   });
 });
 

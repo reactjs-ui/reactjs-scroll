@@ -163,7 +163,7 @@
     "no-process-env": 2, // 在node环境中，不建议使用 process.env ，而使用 config 来配置
     "no-process-exit": 2, // 不要直接调用 process.exit();
     "no-restricted-modules": 2, // 限制使用某些模块，比如 no-restricted-modules: [2, "fs"] ，不能使用fs模块
-    "no-sync": 2, // 我们尽量使用异步方法来代替同步方法，比如操作文件等，
+    "no-sync": 0, // 我们尽量使用异步方法来代替同步方法，比如操作文件等，
 
     // Stylistic Issues
     "array-bracket-spacing": 2, // 数组元素前后是否要加一空格，默认为不必要加，如 var arr = [ 'foo', 'bar' ];  是不正确的写法

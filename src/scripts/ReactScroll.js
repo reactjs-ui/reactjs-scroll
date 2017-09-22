@@ -7,7 +7,6 @@
 import React, {Component} from 'react';
 import PropTypes from 'prop-types';
 import Scroll from './Scroll';
-import '../sass/scroll.scss';
 
 class ReactScroll extends Component {
   //可能需要传入的参数

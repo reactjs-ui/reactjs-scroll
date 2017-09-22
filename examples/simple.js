@@ -1,6 +1,7 @@
 import React, {Component} from 'react';
 import {render} from 'react-dom';
 import Scroll from '../src/scripts/index';
+import '../src/sass/scroll.scss';
 
 class ScrollSimple extends Component {
   render() {

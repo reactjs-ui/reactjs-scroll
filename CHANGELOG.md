@@ -1,5 +1,12 @@
 # React Scroll 更新日志
 
+## version 0.6.0  (2017-9-22)
+
+* scss 文件需要单独引用 import 'reactjs-scroll/sass/scroll.scss';
+* 优化了编译，用 babel 编译成 commonjs 和 es 格式
+* 调整了 npm 发布配置，只发布必需的文件
+* 去掉了 assign 依赖
+
 ## version 0.5.1  (2017-9-20)
 
 * 升级更新 node 依赖包
