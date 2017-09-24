@@ -40,7 +40,7 @@ class ScrollBar {
    */
   translateY(y) {
     const {style} = this.scrollBar;
-    style.webkitTransform = `-webkit-translate3d(0, ${y}px, 0)`;
+    style.webkitTransform = `translate3d(0, ${y}px, 0)`;
     style.transform = `translate3d(0, ${y}px, 0)`;
   }
 

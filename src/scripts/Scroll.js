@@ -23,6 +23,7 @@ function outBack(n) {
   const s = 1.20158;
   return --n * n * ((s + 1) * n + s) + 1;
 }
+
 /**
  * 初始化 Scroll 设置宽度和选项
  * options.scrollBar 设为 true 则显示scrollBar
@@ -307,8 +308,8 @@ class Scroll {
   momentum() {
     const {deceleration} = this.options;
     let {speed} = this;
-    speed = min(speed, scrollSpeed);
     const {scrollSpeed, durationSpeed} = this.options;
+    speed = min(speed, scrollSpeed);
     const {y} = this;
     const rate = (scrollSpeed - Math.PI) / 2;
     let destination = y + (rate * speed * speed) / (2 * deceleration) * (this.distance < 0 ? -1 : 1);
@@ -318,11 +319,11 @@ class Scroll {
     if (y > 0 || y < minY) {
       duration = 600;
       ease = 'out-quart';
-      destination = y > 0 ? 0 : minY
+      destination = y > 0 ? 0 : minY;
     } else if (destination > 0 || destination < minY) {
       ease = outBack;
       destination = destination > 0 ? 0 : minY;
-      duration = 2 * Math.abs(destination - y + 40) / speed
+      duration = 2 * Math.abs(destination - y + 40) / speed;
     }
 
     return {
@@ -413,15 +414,19 @@ class Scroll {
         this.transformScrollBar();
       }
     }
-    style.webkitTransform = `-webkit-translate3d(0, ${y}px, 0)`;
+    style.webkitTransform = `translate3d(0, ${y}px, 0)`;
     style.transform = `translate3d(0, ${y}px, 0)`;
   }
 
 
   /**
-   * 重新计算 scrollBar 大小
+   * 显示 scrollBar 并重新计算 scrollBar 大小
    */
   resizeScrollBar() {
+    const {disableBounceTop, disableBounceBottom} = this.options;
+    if (disableBounceTop && disableBounceBottom && this.viewHeight > this.height) {
+      return;
+    }
     const vh = this.viewHeight;
     const h = vh * vh / this.height;
     this.scrollBar.resize(h);
