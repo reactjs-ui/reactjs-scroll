@@ -1,5 +1,5 @@
 /**
- * ScrollBar contructor
+ * ScrollBar 类
  *
  * @param {Element} scrollPanel
  * @contructor
@@ -14,8 +14,7 @@ class ScrollBar {
   }
 
   /**
-   * Show the scrollBar and resize it
-   *
+   * 重新计算 scrollBar 大小
    * @param {Number} height
    */
   resize(height) {
@@ -24,24 +23,24 @@ class ScrollBar {
     if (height < 20) {
       height = 20;
     }
-    style.height = `${height}px`
-    style.backgroundColor = 'rgba(0,0,0,0.4)'
+    style.height = `${height}px`;
+    style.backgroundColor = 'rgba(0,0,0,0.4)';
   }
 
   /**
-   * Hide this scrollBar
+   * 隐藏 scrollBar
    */
   hide() {
-    this.scrollBar.style.backgroundColor = 'transparent'
+    this.scrollBar.style.backgroundColor = 'transparent';
   }
 
   /**
-   * Move scrollBar by translateY
+   * 移动 scrollBar
    * @param {Number} y
    */
   translateY(y) {
     const {style} = this.scrollBar;
-    style.webkitTransform = `translate3d(0, ${y}px, 0)`;
+    style.webkitTransform = `-webkit-translate3d(0, ${y}px, 0)`;
     style.transform = `translate3d(0, ${y}px, 0)`;
   }
 

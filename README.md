@@ -64,6 +64,8 @@ import {render} from 'react-dom';
 import Scroll from 'reactjs-scroll';
 import 'reactjs-scroll/sass/scroll.scss';
 // 或者 import 'reactjs-scroll/styles/scroll.css';
+// 自定义样式
+import './sass/example.scss';
 
 class ScrollSimple extends Component {
   render() {
@@ -73,10 +75,15 @@ class ScrollSimple extends Component {
     }
     const props = {
       scrollBar: true,
-      maxAmplitude: 50,
+      maxAmplitude: 80,
       debounceTime: 30,
       throttleTime: 100,
-      deceleration: 0.001
+      deceleration: 0.001,
+      scrollSpeed: 10,
+      durationSpeed: 3,
+      disableBounceTop: false,
+      disableBounceBottom: false,
+      className: 'example-scroll'
     };
 
     return (
@@ -101,8 +108,10 @@ render(
 
 | 选项        | 类型   |  功能  |
 | --------   | ----- | ---- |
+| className | PropTypes.string| 自定义样式|
 | children | PropTypes.node| 待渲染的内容|
 | scrollBar | PropTypes.bool| 是否显示滚动条|
+| barClassName | PropTypes.string| 自定义 bar 样式|
 | maxAmplitude | PropTypes.number| 设置上下滑动最大弹性振幅度，单位为像素，默认为 80 像素|
 | debounceTime | PropTypes.number| 设置防抖时间|
 | throttleTime | PropTypes.number| 设置滑动条移动频率，值越大，移动的越缓慢|
@@ -111,6 +120,8 @@ render(
 | thresholdOffset | PropTypes.number | 设置上下移动临界值，移动超过该值，则向上或向下滑动 |
 | durationSpeed | PropTypes.number | 滑动持续时间系数，系数越大，持续的时间短 |
 | easing  | PropTypes.string | 设置加速方式，默认为匀速，详情查看 https://github.com/component/ease |
+| disableBounceTop  | PropTypes.bool | 是否禁用顶部弹跳，当页面到达最上面时，触发 touch 事件阻止向下滑动 |
+| disableBounceBottom  | PropTypes.bool | 是否禁用底部弹跳，当页面到达最下面时，触发 touch 事件阻止向上滑动 |
 
 ## Build
 

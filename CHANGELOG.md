@@ -1,5 +1,15 @@
 # React Scroll 更新日志
 
+## version 0.6.1  (2017-9-24)
+
+* 增加了属性 disableBounceTop 是否禁用顶部弹跳，当页面到达最上面时，触发 touch 事件阻止向下滑动
+* 增加了属性 disableBounceBottom 是否禁用底部弹跳，当页面到达最下面时，触发 touch 事件阻止向上滑动
+* 增加了属性 className 自定义样式
+* 增加了属性 barClassName 自定义 bar 样式
+* 优化了计算回弹速度效果
+* 完善了注释
+* 优化了不能滑到最底部的问题
+
 ## version 0.6.0  (2017-9-22)
 
 * scss 文件需要单独引用 import 'reactjs-scroll/sass/scroll.scss';

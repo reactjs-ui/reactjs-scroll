@@ -1,6 +1,6 @@
 {
   "name": "reactjs-scroll",
-  "version": "0.6.0",
+  "version": "0.6.1",
   "author": {
     "name": "Linder Wang",
     "email": "linder0209@126.com",
@@ -48,7 +48,7 @@
     "cross-env": "^5.0.5",
     "css-loader": "^0.28.7",
     "eruda": "^1.2.6",
-    "eslint": "4.7.1",
+    "eslint": "4.7.2",
     "eslint-loader": "^1.9.0",
     "eslint-plugin-flow-vars": "^0.5.0",
     "eslint-plugin-react": "^7.3.0",

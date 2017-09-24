@@ -2,11 +2,12 @@ import React, {Component} from 'react';
 import {render} from 'react-dom';
 import Scroll from '../src/scripts/index';
 import '../src/sass/scroll.scss';
+import './sass/example.scss';
 
 class ScrollSimple extends Component {
   render() {
     const contents = [];
-    for (let i = 0; i < 2000; i++) {
+    for (let i = 0; i < 20; i++) {
       contents.push(<p key={i}>这里放置真实显示的DOM内容 {i}</p>);
     }
     const props = {
@@ -16,7 +17,10 @@ class ScrollSimple extends Component {
       throttleTime: 100,
       deceleration: 0.001,
       scrollSpeed: 10,
-      durationSpeed: 3
+      durationSpeed: 3,
+      disableBounceTop: true,
+      disableBounceBottom: true,
+      className: 'example-scroll',
     };
 
     return (
