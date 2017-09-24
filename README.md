@@ -132,7 +132,7 @@ gulp build
 ## Publish
 
 ```
-npm publish
+gulp publish
 ```
 
 ## More React Component
