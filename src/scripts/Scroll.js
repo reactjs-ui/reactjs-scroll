@@ -61,7 +61,7 @@ class Scroll {
     this.y = 0;
     this.maxAmplitude = _options.maxAmplitude;
     const {wrapper} = _options;
-    const [scroller] = wrapper.children;
+    const scroller = wrapper.children[0];
     // 包裹区域元素
     this.wrapper = wrapper;
     // 内层元素
@@ -394,7 +394,7 @@ class Scroll {
   getTouch(e) {
     let touch = e;
     if (e.changedTouches && e.changedTouches.length > 0) {
-      [touch] = e.changedTouches;
+      touch = e.changedTouches[0];
     }
     return touch;
   }
