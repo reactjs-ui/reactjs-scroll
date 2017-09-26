@@ -287,7 +287,11 @@
     "object-shorthand": 2,//利用简写法来定义对象属性，如 var foo = {x, y, z}; 表示 var foo = {x:x, y:y, z:z};
     "prefer-arrow-callback": 2,//建议使用箭头函数作为回调函数
     "prefer-const": 2,//能使用常量的地方尽量使用const
-    "prefer-destructuring": 2, // 尽量使用解构表达式，比如 const [foo] = array; 或 const {bar: foo} = object;
+    "prefer-destructuring": [2, {
+      "array": false
+    }, {
+      "enforceForRenamedProperties": false
+    }], // 尽量使用解构表达式，比如 const [foo] = array; 或 const {bar: foo} = object;
     "prefer-numeric-literals": 2, // 不允许直接使用 parseInt 解析字面量变量，比如 parseInt("111110111", 2)，而 parseInt(foo); 是允许的
     "prefer-rest-params": 2, // 建议使用 rest (...args) 参数来代替 arguments
     "prefer-spread": 2,//不要使用apply，应该使用扩展操作符来调用 Math.max(...args);
