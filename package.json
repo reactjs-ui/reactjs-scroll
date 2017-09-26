@@ -18,7 +18,8 @@
   "scripts": {
     "build:commonjs": "cross-env BABEL_ENV=commonjs babel src/scripts --out-dir build/lib",
     "build:es": "cross-env BABEL_ENV=es babel src/scripts --out-dir build/es",
-    "build": "npm run build:commonjs && npm run build:es && gulp build",
+    "prebuild": "gulp clean",
+    "build": "npm run build:commonjs && npm run build:es && gulp build-dist",
     "publish-pre": "npm run build && ncp src/sass build/sass && ncp src/styles build/styles && cp README.md ./build && node publish-config.js"
   },
   "dependencies": {

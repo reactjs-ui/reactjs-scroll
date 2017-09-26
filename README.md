@@ -126,7 +126,7 @@ render(
 ## Build
 
 ```
-gulp build
+npm run build
 ```
 
 ## Publish

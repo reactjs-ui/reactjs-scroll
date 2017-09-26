@@ -85,8 +85,8 @@ gulp.task('webpack:build', () => {
   });
 });
 
-//把 es6 解析为 es5
-gulp.task('build', () => {
+//把 es6 解析为 es5，一个文件
+gulp.task('build-dist', () => {
   gulp.start(['webpack:build']);
 });
 
@@ -144,5 +144,5 @@ gulp.task('publish', () => {
 
 //默认任务
 gulp.task('default', () => {
-  gulp.start('build');
+  gulp.start('example');
 });
